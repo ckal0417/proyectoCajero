@@ -1,0 +1,26 @@
+{
+  "name": "proyectocajero",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+      "start": "ts-node src/index.ts",
+      "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckal0417/proyectoCajero.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ckal0417/proyectoCajero/issues"
+  },
+  "homepage": "https://github.com/ckal0417/proyectoCajero#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
