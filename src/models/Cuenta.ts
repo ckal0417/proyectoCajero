@@ -1,45 +1,119 @@
 import { Transaccion } from "./Transaccion";
+import { TipoTransaccion } from "./TipoTransaccion";
 
 export class Cuenta {
-  private saldo: number;
-  private historial: Transaccion[];
 
-  constructor(
-    public titular: string,
-    saldoInicial: number
-  ) {
-    this.saldo = saldoInicial;
-    this.historial = [];
-  }
+    // Datos del propietario de la cuenta
+    private titular: string;
 
-  consultarSaldo(): number {
-    this.historial.push(new Transaccion("CONSULTA", this.saldo, new Date()));
-    return this.saldo;
-  }
+    // Número de cuenta
+    private numeroCuenta: string;
 
-  depositar(monto: number): void {
-    if (monto <= 0) {
-      throw new Error("El monto debe ser mayor a 0.");
+    // Saldo disponible
+    private saldo: number;
+
+    // Historial de movimientos
+    private historial: Transaccion[];
+
+    constructor(
+        titular: string,
+        saldoInicial: number
+    ) {
+
+        this.titular = titular;
+
+        // Por ahora el número será fijo.
+        // Más adelante podremos generarlo automáticamente.
+        this.numeroCuenta = "100001";
+
+        this.saldo = saldoInicial;
+
+        this.historial = [];
+
     }
 
-    this.saldo += monto;
-    this.historial.push(new Transaccion("DEPOSITO", monto, new Date()));
-  }
+    // =============================
+    // GETTERS
+    // =============================
 
-  retirar(monto: number): void {
-    if (monto <= 0) {
-      throw new Error("El monto debe ser mayor a 0.");
+    public obtenerTitular(): string {
+
+        return this.titular;
+
     }
 
-    if (monto > this.saldo) {
-      throw new Error("Saldo insuficiente.");
+    public obtenerNumeroCuenta(): string {
+
+        return this.numeroCuenta;
+
     }
 
-    this.saldo -= monto;
-    this.historial.push(new Transaccion("RETIRO", monto, new Date()));
-  }
+    public consultarSaldo(): number {
 
-  obtenerHistorial(): Transaccion[] {
-    return this.historial;
-  }
+        return this.saldo;
+
+    }
+
+    public obtenerHistorial(): Transaccion[] {
+
+        return this.historial;
+
+    }
+
+    // =============================
+    // OPERACIONES
+    // =============================
+
+    public depositar(monto: number): void {
+
+        if (monto <= 0) {
+
+            throw new Error("El monto debe ser mayor que cero.");
+
+        }
+
+        this.saldo += monto;
+
+        this.historial.push(
+
+            new Transaccion(
+                TipoTransaccion.DEPOSITO,
+                monto,
+                new Date(),
+                "Depósito realizado"
+            )
+
+        );
+
+    }
+
+    public retirar(monto: number): void {
+
+        if (monto <= 0) {
+
+            throw new Error("El monto debe ser mayor que cero.");
+
+        }
+
+        if (monto > this.saldo) {
+
+            throw new Error("Saldo insuficiente.");
+
+        }
+
+        this.saldo -= monto;
+
+        this.historial.push(
+
+            new Transaccion(
+                TipoTransaccion.RETIRO,
+                monto,
+                new Date(),
+                "Retiro realizado"
+            )
+
+        );
+
+    }
+
 }

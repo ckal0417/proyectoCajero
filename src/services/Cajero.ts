@@ -1,5 +1,5 @@
 import { Cuenta } from "../models/Cuenta";
-import { ICommand } from "../commands/ICommand";
+import { ICommand } from "../interfaces/ICommand";
 
 export class Cajero {
   private comandos: ICommand[];
@@ -19,7 +19,6 @@ export class Cajero {
 
     if (!comando) {
       console.log("Comando no encontrado.");
-      this.mostrarAyuda();
       return;
     }
 
@@ -33,7 +32,7 @@ export class Cajero {
   mostrarHistorial(): void {
     const historial = this.cuenta.obtenerHistorial();
 
-    console.log("=== HISTORIAL ===");
+    console.log("\n=== HISTORIAL ===");
 
     if (historial.length === 0) {
       console.log("No hay movimientos todavía.");
@@ -43,17 +42,5 @@ export class Cajero {
     historial.forEach(transaccion => {
       console.log(transaccion.mostrar());
     });
-  }
-
-  mostrarAyuda(): void {
-    console.log(`
-Comandos disponibles:
-
-saldo
-depositar 100
-retirar 50
-historial
-salir
-`);
   }
 }

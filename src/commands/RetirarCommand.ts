@@ -1,16 +1,39 @@
-import { ICommand } from "./ICommand";
 import { Cuenta } from "../models/Cuenta";
+import { ICommand } from "../interfaces/ICommand";
+import { Consola } from "../utils/consola";
 
 export class RetirarCommand implements ICommand {
-  public nombre: string = "retirar";
 
-  ejecutar(cuenta: Cuenta, monto?: number): void {
-    if (monto === undefined || isNaN(monto)) {
-      console.log("Debes ingresar un monto válido.");
-      return;
+    public nombre: string = "retirar";
+
+    public ejecutar(cuenta: Cuenta, monto?: number): void {
+
+        if (monto === undefined || isNaN(monto)) {
+
+            Consola.error("Debe ingresar un monto válido.");
+            return;
+
+        }
+
+        try {
+
+            cuenta.retirar(monto);
+
+            Consola.exito("Retiro realizado correctamente.");
+
+            Consola.informacion("");
+
+            Consola.informacion(
+                `Saldo actual: $${cuenta.consultarSaldo()}`
+            );
+
+        }
+        catch (error) {
+
+            Consola.error((error as Error).message);
+
+        }
+
     }
 
-    cuenta.retirar(monto);
-    console.log(`Retiro realizado: $${monto}`);
-  }
 }
