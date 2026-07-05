@@ -1,23 +1,23 @@
-export class Consola {
-    public static limpiar(): void {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Consola = void 0;
+class Consola {
+    static limpiar() {
         console.clear();
     }
-
-    public static titulo(texto: string): void {
+    static titulo(texto) {
         console.log("===================================");
         console.log(`        ${texto}`);
         console.log("===================================\n");
     }
-
-    public static informacion(texto: string): void {
+    static informacion(texto) {
         console.log(texto);
     }
-
-    public static exito(texto: string): void {
+    static exito(texto) {
         console.log(`\n ${texto}`);
     }
-
-    public static error(texto: string): void {
+    static error(texto) {
         console.log(`\n ${texto}`);
     }
 }
+exports.Consola = Consola;

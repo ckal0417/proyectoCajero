@@ -1,125 +1,332 @@
 import * as readline from "readline";
-import { Cajero } from "../services/Cajero";
-import { Consola } from "../utils/consola";
+import { BancoService } from "../services/BancoService";
+import { CajeroService } from "../services/CajeroService";
+import { Usuario } from "../models/Usuario";
+import { Consola } from "../utils/Consola";
+import { Formato } from "../utils/Formato";
+import { ConsultarSaldoCommand } from "../commands/ConsultarSaldoCommand";
+import { DepositarCommand } from "../commands/DepositarCommand";
+import { RetirarCommand } from "../commands/RetirarCommand";
+import { HistorialCommand } from "../commands/HistorialCommand";
 
 export class MainMenu {
 
+    private usuario: Usuario | null = null;
+    private cajeroService: CajeroService | null = null;
     constructor(
-        private cajero: Cajero,
-        private consola: readline.Interface
-    ) { }
 
-    // Inicia el programa
+        private bancoService: BancoService,
+        private consola: readline.Interface
+
+    ) {}
+
     public iniciar(): void {
+
         Consola.limpiar();
-        this.mostrarMenu();
+        Consola.titulo("CAJERO AUTOMÁTICO");
+        this.pedirTarjeta();
+
     }
 
-    // Muestra el menú principal
-    private mostrarMenu(): void {
+    private pedirTarjeta(): void {
 
-        Consola.titulo("CAJERO AUTOMÁTICO");
-        console.log("\n1. Consultar saldo");
-        console.log("2. Depositar dinero");
-        console.log("3. Retirar dinero");
-        console.log("4. Ver historial");
-        console.log("5. Salir\n");
+        this.consola.question(
 
-        this.consola.question("Seleccione una opción: ", (opcion: string) => {
+            "Ingrese el número de la tarjeta: ",
 
-            switch (opcion) {
+            (numeroTarjeta: string) => {
 
-                case "1":
+                const usuario = this.bancoService.buscarPorTarjeta(
 
-                    console.clear();
+                    numeroTarjeta
 
-                    this.cajero.ejecutar("saldo");
+                );
 
-                    this.continuar();
+                if (!usuario) {
 
-                    break;
+                    Consola.error("Tarjeta no encontrada.");
+                    return this.continuarInicio();
 
-                case "2":
+                }
 
-                    Consola.limpiar();
-                    Consola.titulo("DEPOSITAR DINERO");
-
-                    this.consola.question("Ingrese el monto: ", (texto: string) => {
-
-                        const monto: number = Number(texto);
-
-                        this.cajero.ejecutar("depositar", monto);
-
-                        this.continuar();
-
-                    });
-
-                    break;
-
-                case "3":
-
-                    Consola.limpiar();
-                    Consola.titulo("RETIRAR DINERO");
-
-                    this.consola.question("Ingrese el monto: ", (texto: string) => {
-
-                        const monto: number = Number(texto);
-
-                        this.cajero.ejecutar("retirar", monto);
-
-                        this.continuar();
-
-                    });
-
-                    break;
-
-                case "4":
-
-                    console.clear();
-
-                    this.cajero.ejecutar("historial");
-
-                    this.continuar();
-
-                    break;
-
-                case "5":
-
-                    console.clear();
-
-                    console.log("Gracias por utilizar el cajero.");
-
-                    this.consola.close();
-
-                    break;
-
-                default:
-
-                    console.clear();
-
-                    Consola.error("Opción inválida.");
-
-                    this.continuar();
-
-                    break;
+                this.usuario = usuario;
+                this.pedirPin();
 
             }
 
-        });
+        );
 
     }
 
-    // Espera ENTER antes de volver al menú
+    private pedirPin(): void {
+
+        this.consola.question(
+
+            "Ingrese su PIN: ",
+
+            (pin: string) => {
+
+                if (
+
+                    !this.usuario ||
+
+                    !this.bancoService.validarPin(
+
+                        this.usuario,pin
+
+                    )
+
+                ) {
+
+                    Consola.error("PIN incorrecto.");
+                    return this.continuarInicio();
+
+                }
+
+                this.prepararSesion();
+
+            }
+
+        );
+
+    }
+
+    private prepararSesion(): void {
+
+        if (!this.usuario) {
+
+            return;
+
+        }
+
+        this.cajeroService = new CajeroService(
+
+            this.usuario.obtenerCuenta()
+
+        );
+
+        this.cajeroService.registrarComando(
+
+            new ConsultarSaldoCommand()
+
+        );
+
+        this.cajeroService.registrarComando(
+
+            new DepositarCommand()
+
+        );
+
+        this.cajeroService.registrarComando(
+
+            new RetirarCommand()
+
+        );
+
+        this.cajeroService.registrarComando(
+
+            new HistorialCommand()
+
+        );
+
+        Consola.limpiar();
+
+        this.mostrarMenu();
+
+    }
+
+    private continuarInicio(): void {
+
+        this.consola.question(
+
+            "\nPresione ENTER para continuar...",
+
+            () => {
+
+                Consola.limpiar();
+
+                Consola.titulo("CAJERO AUTOMÁTICO");
+
+                this.pedirTarjeta();
+
+            }
+
+        );
+
+    }
+
+
+
+    private mostrarMenu(): void {
+
+    if (!this.usuario) {
+
+        return;
+
+    }
+
+    const cuenta = this.usuario.obtenerCuenta();
+
+    Consola.titulo("CAJERO AUTOMÁTICO");
+
+    Consola.informacion(
+        `Titular: ${this.usuario.obtenerNombre()}`
+    );
+
+    Consola.informacion(
+        `Número de cuenta: ${cuenta.obtenerNumeroCuenta()}`
+    );
+
+    Consola.informacion(
+        `Tipo de cuenta: ${cuenta.obtenerTipoCuenta()}`
+    );
+
+    Consola.informacion("");
+    Consola.informacion("1. Consultar saldo");
+    Consola.informacion("2. Depositar dinero");
+    Consola.informacion("3. Retirar dinero");
+    Consola.informacion("4. Ver historial");
+    Consola.informacion("5. Salir");
+
+    Consola.informacion("");
+
+    this.consola.question(
+
+        "Seleccione una opción: ",
+
+        (opcion: string) => {
+
+            this.ejecutarOpcion(opcion);
+
+        }
+
+    );
+
+    }
+
+    private ejecutarOpcion(opcion: string): void {
+
+        if (!this.cajeroService) {
+
+            return;
+
+        }
+
+        switch (opcion) {
+
+            case "1":
+
+                Consola.limpiar();
+
+                this.cajeroService.ejecutar("saldo");
+
+                this.continuar();
+
+                break;
+
+            case "2":
+
+                this.pedirMonto(
+
+                    "DEPOSITAR DINERO",
+
+                    "depositar"
+
+                );
+
+                break;
+
+            case "3":
+
+                this.pedirMonto(
+
+                    "RETIRAR DINERO",
+
+                    "retirar"
+
+                );
+
+                break;
+
+            case "4":
+
+                Consola.limpiar();
+
+                this.cajeroService.ejecutar("historial");
+
+                this.continuar();
+
+                break;
+
+            case "5":
+
+                Consola.limpiar();
+
+                Consola.informacion("Gracias por utilizar el cajero.");
+
+                this.consola.close();
+
+                break;
+
+            default:
+
+                Consola.error("Opción inválida.");
+
+                this.continuar();
+
+                break;
+
+        }
+
+    }
+
+    private pedirMonto(
+        titulo: string,
+        comando: string
+    ): void {
+
+        if (!this.cajeroService) {
+
+            return;
+
+        }
+
+        // Guardamos una referencia al cajero para usarla dentro del callback
+        const cajero = this.cajeroService;
+        Consola.limpiar();
+        Consola.titulo(titulo);
+
+        this.consola.question(
+
+            "Ingrese el monto: ",
+
+            (texto: string) => {
+
+                const monto = Number(texto);
+                cajero.ejecutar(comando, monto);
+                this.continuar();
+
+            }
+
+        );
+
+    }
+
     private continuar(): void {
 
-        this.consola.question("\nPresione ENTER para continuar...", () => {
+        this.consola.question(
 
-            console.clear();
+            "\nPresione ENTER para continuar...",
 
-            this.mostrarMenu();
+            () => {
 
-        });
+                Consola.limpiar();
+
+                this.mostrarMenu();
+
+            }
+
+        );
 
     }
-
 }
