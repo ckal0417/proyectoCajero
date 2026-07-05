@@ -1,29 +1,22 @@
 # Dependencias
 node_modules/
 
-# Código compilado
+# Archivos compilados
 dist/
 build/
 
 # Logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Variables de entorno
 .env
-.env.*
 
-# Archivos de VS Code
+# Visual Studio Code
 .vscode/
 
-# Archivos de sistema
+# Caché TypeScript
+*.tsbuildinfo
+
+# Sistema operativo
 .DS_Store
 Thumbs.db
-
-# Cobertura de pruebas
-coverage/
-
-# Caché de TypeScript
-*.tsbuildinfo
