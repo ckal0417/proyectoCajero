@@ -23,7 +23,7 @@ export class BancoService {
 
             new Usuario(
                 "Juan Pérez",
-                "4587000000000001",
+                "122334",
                 "4321",
                 new Cuenta(
                     "100002",
