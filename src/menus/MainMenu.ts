@@ -8,6 +8,21 @@ import { ConsultarSaldoCommand } from "../commands/ConsultarSaldoCommand";
 import { DepositarCommand } from "../commands/DepositarCommand";
 import { RetirarCommand } from "../commands/RetirarCommand";
 import { HistorialCommand } from "../commands/HistorialCommand";
+import { CuentaRepository } from "../repositories/CuentaRepository";
+import { TransaccionRepository } from "../repositories/TransaccionRepository";
+import {EventBus} from "../events/EventBus";
+import {TiposEvento} from "../events/TiposEvento";
+import {HistorialSubscriber} from "../subscribers/HistorialSubscriber";
+import {AuditoriaSubscriber} from "../subscribers/AuditoriaSubscriber";
+import {CorreoSubscriber} from "../subscribers/CorreoSubscriber";
+import {DepositarOperacion} from "../services/operaciones/deposito/DepositarOperacion";
+import {RetirarOperacion} from "../services/operaciones/retiro/RetirarOperacion";
+import {ConsultarSaldoOperacion} from "../services/operaciones/saldo/ConsultarSaldoOperacion";
+import {ConsultarHistorialOperacion} from "../services/operaciones/historial/ConsultarHistorialOperacion";
+import { LogSubscriber } from "../subscribers/LogSubscriber";
+import { Evento } from "../events/Evento";
+import { Transaccion } from "../models/Transaccion";
+
 
 export class MainMenu {
 
@@ -94,45 +109,112 @@ export class MainMenu {
     private prepararSesion(): void {
 
         if (!this.usuario) {
-
             return;
-
         }
 
+        const cuenta = this.usuario.obtenerCuenta();
+
+        const cuentaRepository = new CuentaRepository([
+            cuenta
+        ]);
+
+        const transaccionRepository = new TransaccionRepository();
+
+        const eventBus = new EventBus();
+
+        const historialSubscriber = new HistorialSubscriber(
+            transaccionRepository
+        );
+
+        const logSubscriber = new LogSubscriber();
+        const auditoriaSubscriber = new AuditoriaSubscriber();
+        const correoSubscriber = new CorreoSubscriber();
+
+        eventBus.suscribir(
+            TiposEvento.DEPOSITO_REALIZADO,
+            evento => historialSubscriber.manejar(
+                evento as Evento<Transaccion>
+            )
+        );
+
+        eventBus.suscribir(
+            TiposEvento.RETIRO_REALIZADO,
+            evento => historialSubscriber.manejar(
+                evento as Evento<Transaccion>
+            )
+        );
+
+        eventBus.suscribir(
+            TiposEvento.DEPOSITO_REALIZADO,
+            evento => logSubscriber.manejar(evento)
+        );
+
+        eventBus.suscribir(
+            TiposEvento.RETIRO_REALIZADO,
+            evento => logSubscriber.manejar(evento)
+        );
+
+        eventBus.suscribir(
+            TiposEvento.DEPOSITO_REALIZADO,
+            evento => auditoriaSubscriber.manejar(evento)
+        );
+
+        eventBus.suscribir(
+            TiposEvento.RETIRO_REALIZADO,
+            evento => auditoriaSubscriber.manejar(evento)
+        );
+
+        eventBus.suscribir(
+            TiposEvento.DEPOSITO_REALIZADO,
+            evento => correoSubscriber.manejar(evento)
+        );
+
+        eventBus.suscribir(
+            TiposEvento.RETIRO_REALIZADO,
+            evento => correoSubscriber.manejar(evento)
+        );
+
+        const depositarOperacion = new DepositarOperacion(
+            cuentaRepository,
+            eventBus
+        );
+
+        const retirarOperacion = new RetirarOperacion(
+            cuentaRepository,
+            eventBus
+        );
+
+        const consultarSaldoOperacion = new ConsultarSaldoOperacion(
+            cuentaRepository
+        );
+
+        const consultarHistorialOperacion = new ConsultarHistorialOperacion(
+            transaccionRepository
+        );
+
         this.cajeroService = new CajeroService(
-
-            this.usuario.obtenerCuenta()
-
+            cuenta
         );
 
         this.cajeroService.registrarComando(
-
-            new ConsultarSaldoCommand()
-
+            new ConsultarSaldoCommand(consultarSaldoOperacion)
         );
 
         this.cajeroService.registrarComando(
-
-            new DepositarCommand()
-
+            new DepositarCommand(depositarOperacion)
         );
 
         this.cajeroService.registrarComando(
-
-            new RetirarCommand()
-
+            new RetirarCommand(retirarOperacion)
         );
 
         this.cajeroService.registrarComando(
-
-            new HistorialCommand()
-
+            new HistorialCommand(consultarHistorialOperacion)
         );
 
         Consola.limpiar();
 
         this.mostrarMenu();
-
     }
 
     private continuarInicio(): void {

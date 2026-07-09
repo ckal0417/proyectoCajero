@@ -1,12 +1,13 @@
 import { Transaccion } from "./Transaccion";
-import { TipoTransaccion } from "./TipoTransaccion";
+import { TipoTransaccion } from "../enums/TipoTransaccion";
+import { TipoCuenta } from "../enums/TipoCuenta";
 
 export class Cuenta {
     private historial: Transaccion[] = [];
 
     constructor(
         private numeroCuenta: string,
-        private tipoCuenta: string,
+        private tipoCuenta: TipoCuenta,
         private saldo: number
     ) {}
 
@@ -14,7 +15,7 @@ export class Cuenta {
         return this.numeroCuenta;
     }
 
-    public obtenerTipoCuenta(): string {
+    public obtenerTipoCuenta(): TipoCuenta {
         return this.tipoCuenta;
     }
 
@@ -23,7 +24,7 @@ export class Cuenta {
     }
 
     public obtenerHistorial(): Transaccion[] {
-        return this.historial;
+        return [...this.historial];
     }
 
     public consultarSaldo(): number {
@@ -60,13 +61,16 @@ export class Cuenta {
         );
     }
 
+    public establecerSaldo(nuevoSaldo: number): void {
+        this.saldo = nuevoSaldo;
+    }
+
     private registrarTransaccion(
         tipo: TipoTransaccion,
         monto: number,
         descripcion: string
     ): void {
         const transaccion = new Transaccion(
-            undefined as unknown as number,
             tipo,
             monto,
             new Date(),

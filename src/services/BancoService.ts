@@ -1,61 +1,49 @@
 import { Usuario } from "../models/Usuario";
-import { Cuenta } from "../models/Cuenta";
+import { UsuarioRepository } from "../repositories/UsuarioRepository";
 
 export class BancoService {
 
-    // Memoria del banco
-    private usuarios: Usuario[];
+    constructor(
+        private usuarioRepository: UsuarioRepository
+    ) {}
 
-    constructor() {
-
-        this.usuarios = [
-
-            new Usuario(
-                "Cristopher Vera",
-                "122333",
-                "1234",
-                new Cuenta(
-                    "100001",
-                    "Ahorros",
-                    500
-                )
-            ),
-
-            new Usuario(
-                "Juan Pérez",
-                "122334",
-                "4321",
-                new Cuenta(
-                    "100002",
-                    "Corriente",
-                    1200
-                )
-            )
-
-        ];
-
-    }
-
-    // Buscar usuario por número de tarjeta
     public buscarPorTarjeta(numeroTarjeta: string): Usuario | null {
 
-        const usuario = this.usuarios.find(
-
-            usuario => usuario.obtenerNumeroTarjeta() === numeroTarjeta
-
+        return this.usuarioRepository.obtenerPorNumeroTarjeta(
+            numeroTarjeta
         );
-
-        return usuario ?? null;
 
     }
 
-    // Validar PIN
     public validarPin(
         usuario: Usuario,
         pin: string
     ): boolean {
 
         return usuario.obtenerPin() === pin;
+
+    }
+
+    public autenticar(
+        numeroTarjeta: string,
+        pin: string
+    ): Usuario | null {
+
+        const usuario = this.buscarPorTarjeta(numeroTarjeta);
+
+        if (!usuario) {
+
+            return null;
+
+        }
+
+        if (!this.validarPin(usuario, pin)) {
+
+            return null;
+
+        }
+
+        return usuario;
 
     }
 
