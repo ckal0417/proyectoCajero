@@ -2,107 +2,62 @@ import * as readline from "readline";
 import { BancoService } from "../services/banco/BancoService";
 import { CajeroService } from "../services/cajero/CajeroService";
 import { Usuario } from "../models/Usuario";
+import { Cuenta } from "../models/Cuenta";
+import { Evento } from "../events/Evento";
+import { Transaccion } from "../models/Transaccion";
 import { Consola } from "../utils/Consola";
-import { Formato } from "../utils/Formato";
+import { LoginMenu } from "./autenticacion/LoginMenu";
+import { DepositoMenu } from "./deposito/DepositoMenu";
+import { RetiroMenu } from "./retiro/RetiroMenu";
+import { HistorialMenu } from "./historial/HistorialMenu";
+import { TransferenciaMenu } from "./Transferencia/TransferenciaMenu";
+import { CuentaRepository } from "../repositories/CuentaRepository";
+import { TransaccionRepository } from "../repositories/TransaccionRepository";
+import { EventBus } from "../events/EventBus";
+import { TiposEvento } from "../events/TiposEvento";
+import { HistorialSubscriber } from "../subscribers/HistorialSubscriber";
+import { AuditoriaSubscriber } from "../subscribers/AuditoriaSubscriber";
+import { CorreoSubscriber } from "../subscribers/CorreoSubscriber";
+import { LogSubscriber } from "../subscribers/LogSubscriber";
+import { DepositoService } from "../services/operaciones/deposito/DepositoService";
+import { RetiroService } from "../services/operaciones/retiro/RetiroService";
+import { SaldoService } from "../services/operaciones/saldo/SaldoService";
+import { HistorialService } from "../services/operaciones/historial/HistorialService";
+import { TransferenciaService } from "../services/operaciones/transferencia/TransferenciaService";
+import { TransferenciaLocalService } from "../services/operaciones/transferencia/local/TransferenciaLocalService";
+import { TransferenciaInterbancariaService } from "../services/operaciones/transferencia/interbancaria/TransferenciaInterbancariaService";
+import { BancoIntermediarioService } from "../services/Intermediario/BancoIntermediarioService";
 import { ConsultarSaldoCommand } from "../commands/ConsultarSaldoCommand";
 import { DepositarCommand } from "../commands/DepositarCommand";
 import { RetirarCommand } from "../commands/RetirarCommand";
 import { HistorialCommand } from "../commands/HistorialCommand";
-import { CuentaRepository } from "../repositories/CuentaRepository";
-import { TransaccionRepository } from "../repositories/TransaccionRepository";
-import {EventBus} from "../events/EventBus";
-import {TiposEvento} from "../events/TiposEvento";
-import {HistorialSubscriber} from "../subscribers/HistorialSubscriber";
-import {AuditoriaSubscriber} from "../subscribers/AuditoriaSubscriber";
-import {CorreoSubscriber} from "../subscribers/CorreoSubscriber";
-import {DepositarOperacion} from "../services/operaciones/deposito/DepositoService";
-import {RetirarOperacion} from "../services/operaciones/retiro/RetiroService";
-import {ConsultarSaldoOperacion} from "../services/operaciones/saldo/SaldoService";
-import {ConsultarHistorialOperacion} from "../services/operaciones/historial/HistorialService";
-import { LogSubscriber } from "../subscribers/LogSubscriber";
-import { Evento } from "../events/Evento";
-import { Transaccion } from "../models/Transaccion";
-
+import { TransferirCommand } from "../commands/TransferirCommand";
 
 export class MainMenu {
 
     private usuario: Usuario | null = null;
-    private cajeroService: CajeroService | null = null;
-    constructor(
 
+    private cajeroService!: CajeroService;
+
+    constructor(
         private bancoService: BancoService,
         private consola: readline.Interface
-
     ) {}
 
     public iniciar(): void {
 
-        Consola.limpiar();
-        Consola.titulo("CAJERO AUTOMÁTICO");
-        this.pedirTarjeta();
-
-    }
-
-    private pedirTarjeta(): void {
-
-        this.consola.question(
-
-            "Ingrese el número de la tarjeta: ",
-
-            (numeroTarjeta: string) => {
-
-                const usuario = this.bancoService.buscarPorTarjeta(
-
-                    numeroTarjeta
-
-                );
-
-                if (!usuario) {
-
-                    Consola.error("Tarjeta no encontrada.");
-                    return this.continuarInicio();
-
-                }
-
-                this.usuario = usuario;
-                this.pedirPin();
-
-            }
-
+        const loginMenu = new LoginMenu(
+            this.bancoService,
+            this.consola
         );
 
-    }
+        loginMenu.iniciar((usuario) => {
 
-    private pedirPin(): void {
+            this.usuario = usuario;
 
-        this.consola.question(
+            this.prepararSesion();
 
-            "Ingrese su PIN: ",
-
-            (pin: string) => {
-
-                if (
-
-                    !this.usuario ||
-
-                    !this.bancoService.validarPin(
-
-                        this.usuario,pin
-
-                    )
-
-                ) {
-
-                    Consola.error("PIN incorrecto.");
-                    return this.continuarInicio();
-
-                }
-
-                this.prepararSesion();
-
-            }
-
-        );
+        });
 
     }
 
@@ -122,26 +77,34 @@ export class MainMenu {
 
         const eventBus = new EventBus();
 
-        const historialSubscriber = new HistorialSubscriber(
-            transaccionRepository
-        );
+        const historialSubscriber =
+            new HistorialSubscriber(
+                transaccionRepository
+            );
 
-        const logSubscriber = new LogSubscriber();
-        const auditoriaSubscriber = new AuditoriaSubscriber();
-        const correoSubscriber = new CorreoSubscriber();
+        const logSubscriber =
+            new LogSubscriber();
+
+        const auditoriaSubscriber =
+            new AuditoriaSubscriber();
+
+        const correoSubscriber =
+            new CorreoSubscriber();
 
         eventBus.suscribir(
             TiposEvento.DEPOSITO_REALIZADO,
-            evento => historialSubscriber.manejar(
-                evento as Evento<Transaccion>
-            )
+            evento =>
+                historialSubscriber.manejar(
+                    evento as Evento<Transaccion>
+                )
         );
 
         eventBus.suscribir(
             TiposEvento.RETIRO_REALIZADO,
-            evento => historialSubscriber.manejar(
-                evento as Evento<Transaccion>
-            )
+            evento =>
+                historialSubscriber.manejar(
+                    evento as Evento<Transaccion>
+                )
         );
 
         eventBus.suscribir(
@@ -174,62 +137,127 @@ export class MainMenu {
             evento => correoSubscriber.manejar(evento)
         );
 
-        const depositarOperacion = new DepositarOperacion(
-            cuentaRepository,
-            eventBus
-        );
+        const depositoService =
+            new DepositoService(
+                cuentaRepository,
+                eventBus
+            );
 
-        const retirarOperacion = new RetirarOperacion(
-            cuentaRepository,
-            eventBus
-        );
+        const retiroService =
+            new RetiroService(
+                cuentaRepository,
+                eventBus
+            );
 
-        const consultarSaldoOperacion = new ConsultarSaldoOperacion(
-            cuentaRepository
-        );
+        const saldoService =
+            new SaldoService(
+                cuentaRepository
+            );
 
-        const consultarHistorialOperacion = new ConsultarHistorialOperacion(
-            transaccionRepository
-        );
+        const historialService =
+            new HistorialService(
+                transaccionRepository
+            );
 
-        this.cajeroService = new CajeroService(
-            cuenta
+        const bancoIntermediarioService =
+            new BancoIntermediarioService();
+
+        const transferenciaLocalService =
+            new TransferenciaLocalService();
+
+        const transferenciaInterbancariaService =
+            new TransferenciaInterbancariaService(
+                bancoIntermediarioService
+            );
+
+        const transferenciaService =
+            new TransferenciaService(
+                transferenciaLocalService,
+                transferenciaInterbancariaService
+            );
+
+        this.cajeroService =
+            new CajeroService(
+                cuenta
+            );
+
+        this.cajeroService.registrarComando(
+            new ConsultarSaldoCommand(
+                saldoService
+            )
         );
 
         this.cajeroService.registrarComando(
-            new ConsultarSaldoCommand(consultarSaldoOperacion)
+            new DepositarCommand(
+                depositoService
+            )
+        );
+        this.cajeroService.registrarComando(
+            new RetirarCommand(
+                retiroService
+            )
         );
 
         this.cajeroService.registrarComando(
-            new DepositarCommand(depositarOperacion)
+            new HistorialCommand(
+                historialService
+            )
         );
 
         this.cajeroService.registrarComando(
-            new RetirarCommand(retirarOperacion)
-        );
-
-        this.cajeroService.registrarComando(
-            new HistorialCommand(consultarHistorialOperacion)
+            new TransferirCommand(
+                transferenciaService
+            )
         );
 
         Consola.limpiar();
 
         this.mostrarMenu();
+
     }
 
-    private continuarInicio(): void {
+    private mostrarMenu(): void {
+
+        if (!this.usuario) {
+            return;
+        }
+
+        const cuenta = this.usuario.obtenerCuenta();
+
+        Consola.limpiar();
+
+        Consola.titulo("CAJERO AUTOMÁTICO");
+
+        Consola.informacion(
+            `Titular: ${this.usuario.obtenerNombre()}`
+        );
+
+        Consola.informacion(
+            `Número de cuenta: ${cuenta.obtenerNumeroCuenta()}`
+        );
+
+        Consola.informacion(
+            `Tipo de cuenta: ${cuenta.obtenerTipoCuenta()}`
+        );
+
+        Consola.informacion("");
+
+        Consola.informacion("1. Consultar saldo");
+        Consola.informacion("2. Depositar dinero");
+        Consola.informacion("3. Retirar dinero");
+        Consola.informacion("4. Ver historial");
+        Consola.informacion("5. Transferencias");
+        Consola.informacion("6. Salir");
+
+        Consola.informacion("");
 
         this.consola.question(
 
-            "\nPresione ENTER para continuar...",
+            "Seleccione una opción: ",
 
-            () => {
+            (opcion: string) => {
 
-                Consola.limpiar();
-
-                Consola.titulo("CAJERO AUTOMÁTICO");
-
-                this.pedirTarjeta();
+                this.ejecutarOpcion(opcion);
 
             }
 
@@ -237,70 +265,24 @@ export class MainMenu {
 
     }
 
+    private ejecutarOpcion(
+        opcion: string
+    ): void {
 
-
-    private mostrarMenu(): void {
-
-    if (!this.usuario) {
-
-        return;
-
-    }
-
-    const cuenta = this.usuario.obtenerCuenta();
-
-    Consola.titulo("CAJERO AUTOMÁTICO");
-
-    Consola.informacion(
-        `Titular: ${this.usuario.obtenerNombre()}`
-    );
-
-    Consola.informacion(
-        `Número de cuenta: ${cuenta.obtenerNumeroCuenta()}`
-    );
-
-    Consola.informacion(
-        `Tipo de cuenta: ${cuenta.obtenerTipoCuenta()}`
-    );
-
-    Consola.informacion("");
-    Consola.informacion("1. Consultar saldo");
-    Consola.informacion("2. Depositar dinero");
-    Consola.informacion("3. Retirar dinero");
-    Consola.informacion("4. Ver historial");
-    Consola.informacion("5. Salir");
-
-    Consola.informacion("");
-
-    this.consola.question(
-
-        "Seleccione una opción: ",
-
-        (opcion: string) => {
-
-            this.ejecutarOpcion(opcion);
-
-        }
-
-    );
-
-    }
-
-    private ejecutarOpcion(opcion: string): void {
-
-        if (!this.cajeroService) {
-
+        if (!this.usuario || !this.cajeroService) {
             return;
-
         }
+
+        const cuenta = this.usuario.obtenerCuenta();
 
         switch (opcion) {
 
             case "1":
 
-                Consola.limpiar();
-
-                this.cajeroService.ejecutar("saldo");
+                this.cajeroService.ejecutar(
+                    "saldo",
+                    cuenta
+                );
 
                 this.continuar();
 
@@ -308,43 +290,67 @@ export class MainMenu {
 
             case "2":
 
-                this.pedirMonto(
+                new DepositoMenu(
 
-                    "DEPOSITAR DINERO",
+                    cuenta,
 
-                    "depositar"
+                    this.cajeroService,
 
-                );
+                    this.consola
+
+                ).iniciar(() => this.mostrarMenu());
 
                 break;
 
             case "3":
 
-                this.pedirMonto(
+                new RetiroMenu(
 
-                    "RETIRAR DINERO",
+                    cuenta,
 
-                    "retirar"
+                    this.cajeroService,
 
-                );
+                    this.consola
+
+                ).iniciar(() => this.mostrarMenu());
 
                 break;
 
             case "4":
 
-                Consola.limpiar();
+                new HistorialMenu(
 
-                this.cajeroService.ejecutar("historial");
+                    cuenta,
 
-                this.continuar();
+                    this.cajeroService,
+
+                    this.consola
+
+                ).iniciar(() => this.mostrarMenu());
 
                 break;
 
             case "5":
 
+                new TransferenciaMenu(
+
+                    cuenta,
+
+                    this.cajeroService,
+
+                    this.consola
+
+                ).iniciar(() => this.mostrarMenu());
+
+                break;
+
+            case "6":
+
                 Consola.limpiar();
 
-                Consola.informacion("Gracias por utilizar el cajero.");
+                Consola.informacion(
+                    "Gracias por utilizar el cajero."
+                );
 
                 this.consola.close();
 
@@ -352,45 +358,15 @@ export class MainMenu {
 
             default:
 
-                Consola.error("Opción inválida.");
+                Consola.error(
+                    "Opción inválida."
+                );
 
                 this.continuar();
 
                 break;
 
         }
-
-    }
-
-    private pedirMonto(
-        titulo: string,
-        comando: string
-    ): void {
-
-        if (!this.cajeroService) {
-
-            return;
-
-        }
-
-        // Guardamos una referencia al cajero para usarla dentro del callback
-        const cajero = this.cajeroService;
-        Consola.limpiar();
-        Consola.titulo(titulo);
-
-        this.consola.question(
-
-            "Ingrese el monto: ",
-
-            (texto: string) => {
-
-                const monto = Number(texto);
-                cajero.ejecutar(comando, monto);
-                this.continuar();
-
-            }
-
-        );
 
     }
 
@@ -402,8 +378,6 @@ export class MainMenu {
 
             () => {
 
-                Consola.limpiar();
-
                 this.mostrarMenu();
 
             }
@@ -411,4 +385,5 @@ export class MainMenu {
         );
 
     }
+
 }
