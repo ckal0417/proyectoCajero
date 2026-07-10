@@ -2,7 +2,7 @@ import { Resultado, ResultadoOperacion } from "../../../common/Resultado";
 import { TransaccionRepository } from "../../../repositories/TransaccionRepository";
 import { Transaccion } from "../../../models/Transaccion";
 
-export class ConsultarHistorialOperacion {
+export class HistorialService {
     constructor(
         private transaccionRepository: TransaccionRepository
     ) {}

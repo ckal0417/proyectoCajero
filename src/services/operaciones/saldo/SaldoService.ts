@@ -1,7 +1,7 @@
 import { Resultado, ResultadoOperacion } from "../../../common/Resultado";
 import { CuentaRepository } from "../../../repositories/CuentaRepository";
 
-export class ConsultarSaldoOperacion {
+export class SaldoService {
     constructor(
         private cuentaRepository: CuentaRepository
     ) {}

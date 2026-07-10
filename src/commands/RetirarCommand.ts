@@ -1,18 +1,23 @@
-import { Cuenta } from "../models/Cuenta";
 import { ICommand } from "../interfaces/ICommand";
+import { Cuenta } from "../models/Cuenta";
 import { Consola } from "../utils/Consola";
 import { Formato } from "../utils/Formato";
 import { MontoValidacion } from "../utils/validaciones/MontoValidacion";
-import { RetirarOperacion } from "../services/operaciones/retiro/RetirarOperacion";
+import { RetiroService } from "../services/operaciones/retiro/RetiroService";
 
 export class RetirarCommand implements ICommand {
-    public nombre: string = "retirar";
+
+    public nombre = "retirar";
 
     constructor(
-        private operacion: RetirarOperacion
+        private retiroService: RetiroService
     ) {}
 
-    public ejecutar(cuenta: Cuenta, monto?: number): void {
+    public ejecutar(...parametros: unknown[]): void {
+
+        const cuenta = parametros[0] as Cuenta;
+        const monto = parametros[1] as number;
+
         const validacion = MontoValidacion.validar(monto);
 
         if (!validacion.exitoso) {
@@ -20,7 +25,7 @@ export class RetirarCommand implements ICommand {
             return;
         }
 
-        const resultado = this.operacion.ejecutar(
+        const resultado = this.retiroService.ejecutar(
             cuenta.obtenerNumeroCuenta(),
             validacion.valor
         );
@@ -31,9 +36,13 @@ export class RetirarCommand implements ICommand {
         }
 
         Consola.exito("Retiro realizado correctamente.");
+
         Consola.informacion("");
+
         Consola.informacion(
             `Saldo actual: ${Formato.dinero(cuenta.obtenerSaldo())}`
         );
+
     }
+
 }

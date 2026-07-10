@@ -1,4 +1,4 @@
-import { Cuenta } from "../../../models/Cuenta";
+import { Cuenta } from "../../../../models/Cuenta";
 
 export class TransferenciaLocalService {
 

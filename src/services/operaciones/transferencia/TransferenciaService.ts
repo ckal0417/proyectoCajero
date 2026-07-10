@@ -1,57 +1,42 @@
 import { Cuenta } from "../../../models/Cuenta";
-import { TransferenciaLocalService } from "./TransferenciaLocalService";
-import { TransferenciaInterbancariaService } from "./TransferenciaInterbancariaService";
+import { TransferenciaLocalService } from "./local/TransferenciaLocalService";
+import { TransferenciaInterbancariaService } from "./interbancaria/TransferenciaInterbancariaService";
 
 export class TransferenciaService {
 
     constructor(
-
-        private transferenciaLocal: TransferenciaLocalService,
-
-        private transferenciaInterbancaria: TransferenciaInterbancariaService
-
+        private transferenciaLocalService: TransferenciaLocalService,
+        private transferenciaInterbancariaService: TransferenciaInterbancariaService
     ) {}
 
-    public transferir(
-
+    public realizarTransferenciaLocal(
         cuentaOrigen: Cuenta,
-
-        cuentaDestino: Cuenta | null,
-
-        bancoDestino: string,
-
-        numeroCuentaDestino: string,
-
+        cuentaDestino: Cuenta,
         monto: number
-
     ): boolean {
 
-        if (cuentaDestino) {
-
-            this.transferenciaLocal.transferir(
-
-                cuentaOrigen,
-
-                cuentaDestino,
-
-                monto
-
-            );
-
-            return true;
-
-        }
-
-        return this.transferenciaInterbancaria.transferir(
-
+        this.transferenciaLocalService.transferir(
             cuentaOrigen,
-
-            bancoDestino,
-
-            numeroCuentaDestino,
-
+            cuentaDestino,
             monto
+        );
 
+        return true;
+
+    }
+
+    public realizarTransferenciaInterbancaria(
+        cuentaOrigen: Cuenta,
+        bancoDestino: string,
+        numeroCuentaDestino: string,
+        monto: number
+    ): boolean {
+
+        return this.transferenciaInterbancariaService.transferir(
+            cuentaOrigen,
+            bancoDestino,
+            numeroCuentaDestino,
+            monto
         );
 
     }

@@ -1,20 +1,24 @@
-import { Cuenta } from "../models/Cuenta";
 import { ICommand } from "../interfaces/ICommand";
+import { Cuenta } from "../models/Cuenta";
 import { Consola } from "../utils/Consola";
 import { Formato } from "../utils/Formato";
-import { ConsultarSaldoOperacion } from "../services/operaciones/saldo/ConsultarSaldoOperacion";
+import { SaldoService } from "../services/operaciones/saldo/SaldoService"
 
 export class ConsultarSaldoCommand implements ICommand {
-    public nombre: string = "saldo";
+
+    public nombre = "saldo";
 
     constructor(
-        private operacion: ConsultarSaldoOperacion
+        private saldoService: SaldoService
     ) {}
 
-    public ejecutar(cuenta: Cuenta): void {
+    public ejecutar(...parametros: unknown[]): void {
+
+        const cuenta = parametros[0] as Cuenta;
+
         Consola.titulo("CONSULTAR SALDO");
 
-        const resultado = this.operacion.ejecutar(
+        const resultado = this.saldoService.ejecutar(
             cuenta.obtenerNumeroCuenta()
         );
 
@@ -23,9 +27,10 @@ export class ConsultarSaldoCommand implements ICommand {
             return;
         }
 
-        Consola.informacion(`Cuenta: ${cuenta.obtenerNumeroCuenta()}`);
         Consola.informacion(
             `Saldo actual: ${Formato.dinero(resultado.valor)}`
         );
+
     }
+
 }

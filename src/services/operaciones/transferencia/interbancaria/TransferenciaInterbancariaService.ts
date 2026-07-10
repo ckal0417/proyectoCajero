@@ -1,40 +1,26 @@
-import { Cuenta } from "../../../models/Cuenta";
-import { BancoIntermediarioService } from "./BancoIntermediarioService";
-
+import { Cuenta } from "../../../../models/Cuenta";
+import { BancoIntermediarioService } from "../../../Intermediario/BancoIntermediarioService";
 export class TransferenciaInterbancariaService {
 
     constructor(
-
-        private bancoIntermediario: BancoIntermediarioService
-
+        private bancoIntermediarioService: BancoIntermediarioService
     ) {}
 
     public transferir(
-
         cuentaOrigen: Cuenta,
-
         bancoDestino: string,
-
         numeroCuentaDestino: string,
-
         monto: number
-
     ): boolean {
 
         cuentaOrigen.retirar(monto);
 
-        return this.bancoIntermediario.procesarTransferencia(
-
+        return this.bancoIntermediarioService.procesarTransferencia(
             "Banco Principal",
-
             bancoDestino,
-
             cuentaOrigen.obtenerNumeroCuenta(),
-
             numeroCuentaDestino,
-
             monto
-
         );
 
     }

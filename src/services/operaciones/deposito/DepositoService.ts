@@ -5,7 +5,7 @@ import { TiposEvento } from "../../../events/TiposEvento";
 import { Transaccion } from "../../../models/Transaccion";
 import { TipoTransaccion } from "../../../enums/TipoTransaccion";
 
-export class DepositarOperacion {
+export class DepositoService {
     constructor(
         private cuentaRepository: CuentaRepository,
         private eventBus: EventBus

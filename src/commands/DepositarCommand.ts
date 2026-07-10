@@ -1,18 +1,23 @@
-import { Cuenta } from "../models/Cuenta";
 import { ICommand } from "../interfaces/ICommand";
+import { Cuenta } from "../models/Cuenta";
 import { Consola } from "../utils/Consola";
 import { Formato } from "../utils/Formato";
 import { MontoValidacion } from "../utils/validaciones/MontoValidacion";
-import { DepositarOperacion } from "../services/operaciones/deposito/DepositarOperacion";
+import { DepositoService } from "../services/operaciones/deposito/DepositoService";
 
 export class DepositarCommand implements ICommand {
-    public nombre: string = "depositar";
+
+    public nombre = "depositar";
 
     constructor(
-        private operacion: DepositarOperacion
+        private depositoService: DepositoService
     ) {}
 
-    public ejecutar(cuenta: Cuenta, monto?: number): void {
+    public ejecutar(...parametros: unknown[]): void {
+
+        const cuenta = parametros[0] as Cuenta;
+        const monto = parametros[1] as number;
+
         const validacion = MontoValidacion.validar(monto);
 
         if (!validacion.exitoso) {
@@ -20,7 +25,7 @@ export class DepositarCommand implements ICommand {
             return;
         }
 
-        const resultado = this.operacion.ejecutar(
+        const resultado = this.depositoService.ejecutar(
             cuenta.obtenerNumeroCuenta(),
             validacion.valor
         );
@@ -31,9 +36,13 @@ export class DepositarCommand implements ICommand {
         }
 
         Consola.exito("Depósito realizado correctamente.");
+
         Consola.informacion("");
+
         Consola.informacion(
             `Saldo actual: ${Formato.dinero(cuenta.obtenerSaldo())}`
         );
+
     }
+
 }

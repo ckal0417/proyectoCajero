@@ -1,19 +1,20 @@
-import { Cuenta } from "../models/Cuenta";
 import { ICommand } from "../interfaces/ICommand";
 import { Consola } from "../utils/Consola";
-import { ConsultarHistorialOperacion } from "../services/operaciones/historial/ConsultarHistorialOperacion";
+import { HistorialService } from "../services/operaciones/historial/HistorialService";
 
 export class HistorialCommand implements ICommand {
-    public nombre: string = "historial";
+
+    public nombre = "historial";
 
     constructor(
-        private operacion: ConsultarHistorialOperacion
+        private historialService: HistorialService
     ) {}
 
-    public ejecutar(_cuenta: Cuenta): void {
+    public ejecutar(..._parametros: unknown[]): void {
+
         Consola.titulo("HISTORIAL");
 
-        const resultado = this.operacion.ejecutar();
+        const resultado = this.historialService.ejecutar();
 
         if (!resultado.exitoso) {
             Consola.error(resultado.error);
@@ -21,12 +22,16 @@ export class HistorialCommand implements ICommand {
         }
 
         if (resultado.valor.length === 0) {
-            Consola.informacion("No existen movimientos todavía.");
+            Consola.informacion("No existen movimientos.");
             return;
         }
 
         resultado.valor.forEach(transaccion => {
-            Consola.informacion(transaccion.mostrar());
+            Consola.informacion(
+                transaccion.mostrar()
+            );
         });
+
     }
+
 }
