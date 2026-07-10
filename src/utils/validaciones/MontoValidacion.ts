@@ -6,27 +6,27 @@ export class MontoValidacion {
 
         if (monto === undefined) {
             return {
-                exitoso: false,
+                estado: false,
                 error: "Debe ingresar un monto."
             };
         }
 
         if (isNaN(monto)) {
             return {
-                exitoso: false,
+                estado: false,
                 error: "Debe ingresar un número válido."
             };
         }
 
         if (monto <= 0) {
             return {
-                exitoso: false,
+                estado: false,
                 error: "El monto debe ser mayor que cero."
             };
         }
 
         return {
-            exitoso: true,
+            estado: true,
             valor: monto
         };
 

@@ -24,7 +24,7 @@ export class UsuarioRepository implements IRepository<Usuario> {
 
             new Usuario(
                 "Juan Pérez",
-                "122334",
+                " http://localhost:3000",
                 "4321",
                 new Cuenta(
                     "100002",

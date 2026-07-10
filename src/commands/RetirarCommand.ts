@@ -20,7 +20,7 @@ export class RetirarCommand implements ICommand {
 
         const validacion = MontoValidacion.validar(monto);
 
-        if (!validacion.exitoso) {
+        if (!validacion.estado) {
             Consola.error(validacion.error);
             return;
         }
@@ -30,7 +30,7 @@ export class RetirarCommand implements ICommand {
             validacion.valor
         );
 
-        if (!resultado.exitoso) {
+        if (!resultado.estado) {
             Consola.error(resultado.error);
             return;
         }

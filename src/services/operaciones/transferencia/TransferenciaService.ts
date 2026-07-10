@@ -28,7 +28,7 @@ export class TransferenciaService {
             montoTransferencia
         );
 
-        if (!validacion.exitoso) {
+        if (!validacion.estado) {
             return ResultadoOperacion.fallido(
                 validacion.error
             );
@@ -111,7 +111,7 @@ export class TransferenciaService {
             montoTransferencia
         );
 
-        if (!validacion.exitoso) {
+        if (!validacion.estado) {
             return ResultadoOperacion.fallido(
                 validacion.error
             );
