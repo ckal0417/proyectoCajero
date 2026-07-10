@@ -16,7 +16,7 @@ export class HistorialCommand implements ICommand {
 
         const resultado = this.historialService.ejecutar();
 
-        if (!resultado.exitoso) {
+        if (!resultado.estado) {
             Consola.error(resultado.error);
             return;
         }

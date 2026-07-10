@@ -8,27 +8,27 @@ export class TarjetaValidacion {
 
         if (tarjetaLimpia.length === 0) {
             return {
-                exitoso: false,
+                estado: false,
                 error: "Debe ingresar el número de la tarjeta."
             };
         }
 
         if (!/^\d+$/.test(tarjetaLimpia)) {
             return {
-                exitoso: false,
+                estado: false,
                 error: "La tarjeta solo debe contener números."
             };
         }
 
         if (tarjetaLimpia.length < 12) {
             return {
-                exitoso: false,
+                estado: false,
                 error: "El número de tarjeta es demasiado corto."
             };
         }
 
         return {
-            exitoso: true,
+            estado: true,
             valor: tarjetaLimpia
         };
 

@@ -8,27 +8,27 @@ export class PinValidacion {
 
         if (pinLimpio.length === 0) {
             return {
-                exitoso: false,
+                estado: false,
                 error: "Debe ingresar el PIN."
             };
         }
 
         if (!/^\d+$/.test(pinLimpio)) {
             return {
-                exitoso: false,
+                estado: false,
                 error: "El PIN solo debe contener números."
             };
         }
 
         if (pinLimpio.length !== 4) {
             return {
-                exitoso: false,
+                estado: false,
                 error: "El PIN debe tener 4 dígitos."
             };
         }
 
         return {
-            exitoso: true,
+            estado: true,
             valor: pinLimpio
         };
 

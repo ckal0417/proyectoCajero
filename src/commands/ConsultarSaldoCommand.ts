@@ -22,7 +22,7 @@ export class ConsultarSaldoCommand implements ICommand {
             cuenta.obtenerNumeroCuenta()
         );
 
-        if (!resultado.exitoso) {
+        if (!resultado.estado) {
             Consola.error(resultado.error);
             return;
         }

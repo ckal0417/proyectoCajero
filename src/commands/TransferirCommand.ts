@@ -75,12 +75,12 @@ export class TransferirCommand implements ICommand {
 
     private mostrarResultado(
         resultado: {
-            exitoso: boolean;
+            estado: boolean;
             error?: string;
         }
     ): void {
 
-        if (!resultado.exitoso) {
+        if (!resultado.estado) {
             Consola.error(
                 resultado.error ??
                 "No fue posible realizar la transferencia."
