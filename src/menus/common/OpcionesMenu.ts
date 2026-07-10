@@ -1,5 +1,5 @@
 import * as readline from "readline";
-import { Consola } from "../utils/Consola";
+import { Consola } from "../../utils/Consola";
 
 export class OpcionesMenu {
 

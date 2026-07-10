@@ -1,14 +1,14 @@
-import { EventBus } from "../../events/EventBus";
-import { CuentaRepository } from "../../repositories/CuentaRepository";
-import { TransaccionRepository } from "../../repositories/TransaccionRepository";
-import { DepositoService } from "../operaciones/deposito/DepositoService";
-import { RetiroService } from "../operaciones/retiro/RetiroService";
-import { SaldoService } from "../operaciones/saldo/SaldoService";
-import { HistorialService } from "../operaciones/historial/HistorialService";
-import { TransferenciaService } from "../operaciones/transferencia/TransferenciaService";
-import { TransferenciaLocalService } from "../operaciones/transferencia/local/TransferenciaLocalService";
-import { TransferenciaInterbancariaService } from "../operaciones/transferencia/interbancaria/TransferenciaInterbancariaService";
-import { BancoIntermediarioService } from "../Intermediario/BancoIntermediarioService";
+import { EventBus } from "../events/EventBus";
+import { CuentaRepository } from "../repositories/CuentaRepository";
+import { TransaccionRepository } from "../repositories/TransaccionRepository";
+import { DepositoService } from "./comandos/DepositoService";
+import { RetiroService } from "./comandos/RetiroService";
+import { SaldoService } from "./comandos/SaldoService";
+import { HistorialService } from "./comandos/HistorialService";
+import { TransferenciaService } from "./comandos/transferencia/TransferenciaService";
+import { TransferenciaLocalService } from "./comandos/transferencia/local/TransferenciaLocalService";
+import { TransferenciaInterbancariaService } from "./comandos/transferencia/interbancaria/TransferenciaInterbancariaService";
+import { BancoIntermediarioService } from "./BancoIntermediarioService";
 
 export class ServiceFactory {
 

@@ -1,4 +1,4 @@
-import { BancoService } from "../services/banco/BancoService";
+import { BancoService } from "../services/BancoService";
 import { CuentaRepository } from "./CuentaRepository";
 import { TransaccionRepository } from "./TransaccionRepository";
 

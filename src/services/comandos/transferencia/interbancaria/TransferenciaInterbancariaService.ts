@@ -1,5 +1,5 @@
 import { Cuenta } from "../../../../models/Cuenta";
-import { BancoIntermediarioService } from "../../../Intermediario/BancoIntermediarioService";
+import { BancoIntermediarioService } from "../../../BancoIntermediarioService";
 
 export class TransferenciaInterbancariaService {
 

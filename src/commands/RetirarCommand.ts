@@ -1,16 +1,16 @@
-import { ICommand } from "../../interfaces/ICommand";
-import { Cuenta } from "../../models/Cuenta";
-import { Consola } from "../../utils/Consola";
-import { Formato } from "../../utils/Formato";
-import { MontoValidacion } from "../../utils/validaciones/MontoValidacion";
-import { DepositoService } from "../../services/operaciones/deposito/DepositoService";
+import { ICommand } from "../interfaces/ICommand";
+import { Cuenta } from "../models/Cuenta";
+import { Consola } from "../utils/Consola";
+import { Formato } from "../utils/Formato";
+import { MontoValidacion } from "../utils/validaciones/MontoValidacion";
+import { RetiroService } from "../services/comandos/retiro/RetiroService";
 
-export class DepositarCommand implements ICommand {
+export class RetirarCommand implements ICommand {
 
-    public nombre = "depositar";
+    public nombre = "retirar";
 
     constructor(
-        private depositoService: DepositoService
+        private retiroService: RetiroService
     ) {}
 
     public ejecutar(...parametros: unknown[]): void {
@@ -25,7 +25,7 @@ export class DepositarCommand implements ICommand {
             return;
         }
 
-        const resultado = this.depositoService.ejecutar(
+        const resultado = this.retiroService.ejecutar(
             cuenta.obtenerNumeroCuenta(),
             validacion.valor
         );
@@ -35,7 +35,7 @@ export class DepositarCommand implements ICommand {
             return;
         }
 
-        Consola.exito("Depósito realizado correctamente.");
+        Consola.exito("Retiro realizado correctamente.");
 
         Consola.informacion("");
 

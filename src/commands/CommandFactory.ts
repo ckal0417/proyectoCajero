@@ -1,14 +1,14 @@
-import { CajeroService } from "../../services/cajero/CajeroService";
-import { DepositoService } from "../../services/operaciones/deposito/DepositoService";
-import { RetiroService } from "../../services/operaciones/retiro/RetiroService";
-import { SaldoService } from "../../services/operaciones/saldo/SaldoService";
-import { HistorialService } from "../../services/operaciones/historial/HistorialService";
-import { TransferenciaService } from "../../services/operaciones/transferencia/TransferenciaService";
-import { ConsultarSaldoCommand } from "../saldo/ConsultarSaldoCommand";
-import { DepositarCommand } from "../deposito/DepositarCommand";
-import { RetirarCommand } from "../retiro/RetirarCommand";
-import { HistorialCommand } from "../historial/HistorialCommand";
-import { TransferirCommand } from "../transferir/TransferirCommand";
+import { CajeroService } from "../services/CajeroService";
+import { DepositoService } from "../services/comandos/DepositoService";
+import { RetiroService } from "../services/comandos/RetiroService";
+import { SaldoService } from "../services/comandos/SaldoService";
+import { HistorialService } from "../services/comandos/HistorialService";
+import { TransferenciaService } from "../services/comandos/transferencia/TransferenciaService";
+import { ConsultarSaldoCommand } from "./ConsultarSaldoCommand";
+import { DepositarCommand } from "./DepositarCommand";
+import { RetirarCommand } from "./RetirarCommand";
+import { HistorialCommand } from "./HistorialCommand";
+import { TransferirCommand } from "./TransferirCommand";
 
 export class CommandFactory {
 

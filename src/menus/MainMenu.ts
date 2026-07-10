@@ -1,16 +1,16 @@
 import * as readline from "readline";
 import { Usuario } from "../models/Usuario";
-import { BancoService } from "../services/banco/BancoService";
-import { CajeroService } from "../services/cajero/CajeroService";
-import { SesionFactory } from "../sesion/factory/SesionFactory";
+import { BancoService } from "../services/BancoService";
+import { CajeroService } from "../services/CajeroService";
+import { SesionFactory } from "../bootstrap/SesionFactory";
 import { Consola } from "../utils/Consola";
 import { LoginMenu } from "./autenticacion/LoginMenu";
-import { DepositoMenu } from "./deposito/DepositoMenu";
-import { RetiroMenu } from "./retiro/RetiroMenu";
-import { HistorialMenu } from "./historial/HistorialMenu";
-import { TransferenciaMenu } from "./Transferencia/TransferenciaMenu";
-import { CabeceraMenu } from "./CabeceraMenu";
-import { OpcionesMenu } from "./OpcionesMenu";
+import { DepositoMenu } from "./comandos/DepositoMenu";
+import { RetiroMenu } from "./comandos/RetiroMenu";
+import { HistorialMenu } from "./comandos/HistorialMenu";
+import { TransferenciaMenu } from "./comandos/Transferencia/TransferenciaMenu";
+import { CabeceraMenu } from "./common/CabeceraMenu";
+import { OpcionesMenu } from "./common/OpcionesMenu";
 
 export class MainMenu {
 

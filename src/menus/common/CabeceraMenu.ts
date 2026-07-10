@@ -1,5 +1,5 @@
-import { Usuario } from "../models/Usuario";
-import { Consola } from "../utils/Consola";
+import { Usuario } from "../../models/Usuario";
+import { Consola } from "../../utils/Consola";
 
 export class CabeceraMenu {
 

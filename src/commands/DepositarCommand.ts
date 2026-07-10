@@ -3,14 +3,14 @@ import { Cuenta } from "../models/Cuenta";
 import { Consola } from "../utils/Consola";
 import { Formato } from "../utils/Formato";
 import { MontoValidacion } from "../utils/validaciones/MontoValidacion";
-import { RetiroService } from "../services/operaciones/retiro/RetiroService";
+import { DepositoService } from "../services/comandos/deposito/DepositoService";
 
-export class RetirarCommand implements ICommand {
+export class DepositarCommand implements ICommand {
 
-    public nombre = "retirar";
+    public nombre = "depositar";
 
     constructor(
-        private retiroService: RetiroService
+        private depositoService: DepositoService
     ) {}
 
     public ejecutar(...parametros: unknown[]): void {
@@ -25,7 +25,7 @@ export class RetirarCommand implements ICommand {
             return;
         }
 
-        const resultado = this.retiroService.ejecutar(
+        const resultado = this.depositoService.ejecutar(
             cuenta.obtenerNumeroCuenta(),
             validacion.valor
         );
@@ -35,7 +35,7 @@ export class RetirarCommand implements ICommand {
             return;
         }
 
-        Consola.exito("Retiro realizado correctamente.");
+        Consola.exito("Depósito realizado correctamente.");
 
         Consola.informacion("");
 

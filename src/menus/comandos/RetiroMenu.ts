@@ -1,5 +1,5 @@
 import * as readline from "readline";
-import { CajeroService } from "../../services/cajero/CajeroService";
+import { CajeroService } from "../../services/CajeroService";
 import { Cuenta } from "../../models/Cuenta";
 import { Consola } from "../../utils/Consola";
 
