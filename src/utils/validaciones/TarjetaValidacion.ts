@@ -1,4 +1,4 @@
-import { Resultado } from "../../common/Resultado";
+import { Resultado } from "../../models/Resultado";
 
 export class TarjetaValidacion {
 

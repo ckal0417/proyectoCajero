@@ -1,6 +1,6 @@
-import { ICommand } from "../interfaces/ICommand";
-import { Consola } from "../utils/Consola";
-import { HistorialService } from "../services/operaciones/historial/HistorialService";
+import { ICommand } from "../../interfaces/ICommand";
+import { Consola } from "../../utils/Consola";
+import { HistorialService } from "../../services/operaciones/historial/HistorialService";
 
 export class HistorialCommand implements ICommand {
 

@@ -1,4 +1,4 @@
-import { Resultado, ResultadoOperacion } from "../../common/Resultado";
+import { Resultado, ResultadoOperacion } from "../../models/Resultado";
 
 export class TransferenciaValidacion {
 

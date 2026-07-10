@@ -4,11 +4,11 @@ import { RetiroService } from "../../services/operaciones/retiro/RetiroService";
 import { SaldoService } from "../../services/operaciones/saldo/SaldoService";
 import { HistorialService } from "../../services/operaciones/historial/HistorialService";
 import { TransferenciaService } from "../../services/operaciones/transferencia/TransferenciaService";
-import { ConsultarSaldoCommand } from "../ConsultarSaldoCommand";
-import { DepositarCommand } from "../DepositarCommand";
-import { RetirarCommand } from "../RetirarCommand";
-import { HistorialCommand } from "../HistorialCommand";
-import { TransferirCommand } from "../TransferirCommand";
+import { ConsultarSaldoCommand } from "../saldo/ConsultarSaldoCommand";
+import { DepositarCommand } from "../deposito/DepositarCommand";
+import { RetirarCommand } from "../retiro/RetirarCommand";
+import { HistorialCommand } from "../historial/HistorialCommand";
+import { TransferirCommand } from "../transferir/TransferirCommand";
 
 export class CommandFactory {
 

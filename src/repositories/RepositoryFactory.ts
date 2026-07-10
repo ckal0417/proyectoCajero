@@ -1,6 +1,6 @@
-import { BancoService } from "../../services/banco/BancoService";
-import { CuentaRepository } from "../CuentaRepository";
-import { TransaccionRepository } from "../TransaccionRepository";
+import { BancoService } from "../services/banco/BancoService";
+import { CuentaRepository } from "./CuentaRepository";
+import { TransaccionRepository } from "./TransaccionRepository";
 
 export class RepositoryFactory {
 

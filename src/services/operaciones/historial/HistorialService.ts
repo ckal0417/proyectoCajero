@@ -1,4 +1,4 @@
-import { Resultado, ResultadoOperacion } from "../../../common/Resultado";
+import { Resultado, ResultadoOperacion } from "../../../models/Resultado";
 import { TransaccionRepository } from "../../../repositories/TransaccionRepository";
 import { Transaccion } from "../../../models/Transaccion";
 
