@@ -2,63 +2,95 @@ import { ICommand } from "../interfaces/ICommand";
 import { Cuenta } from "../models/Cuenta";
 import { Consola } from "../utils/Consola";
 import { TransferenciaService } from "../services/operaciones/transferencia/TransferenciaService";
+import { TipoTransferencia } from "../enums/TipoTransferencia";
 
 export class TransferirCommand implements ICommand {
 
-    public nombre = "transferir";
+    public nombre: string = "transferir";
 
     constructor(
         private transferenciaService: TransferenciaService
     ) {}
 
     public ejecutar(
-        cuentaOrigen: Cuenta,
-        cuentaDestino: Cuenta | null,
-        bancoDestino: string,
-        numeroCuentaDestino: string,
-        monto: number
+        ...parametros: unknown[]
     ): void {
 
-        let realizada = false;
+        const cuentaOrigen = parametros[0] as Cuenta;
+        const tipoTransferencia =
+            parametros[1] as TipoTransferencia;
 
-        if (cuentaDestino) {
+        if (tipoTransferencia === TipoTransferencia.LOCAL) {
 
-            realizada = this.transferenciaService.realizarTransferenciaLocal(
+            const numeroCuentaDestino =
+                parametros[2] as string;
 
-                cuentaOrigen,
+            const montoTransferencia =
+                parametros[3] as number;
 
-                cuentaDestino,
+            const resultado =
+                this.transferenciaService.realizarTransferenciaLocal(
+                    cuentaOrigen.obtenerNumeroCuenta(),
+                    numeroCuentaDestino,
+                    montoTransferencia
+                );
 
-                monto
+            this.mostrarResultado(resultado);
 
-            );
-
-        } else {
-
-            realizada = this.transferenciaService.realizarTransferenciaInterbancaria(
-
-                cuentaOrigen,
-
-                bancoDestino,
-
-                numeroCuentaDestino,
-
-                monto
-
-            );
-
+            return;
         }
 
-        if (realizada) {
+        if (
+            tipoTransferencia ===
+            TipoTransferencia.INTERBANCARIA
+        ) {
 
-            Consola.exito("Transferencia realizada correctamente.");
+            const bancoDestino =
+                parametros[2] as string;
 
-        } else {
+            const numeroCuentaDestino =
+                parametros[3] as string;
 
-            Consola.error("No fue posible realizar la transferencia.");
+            const montoTransferencia =
+                parametros[4] as number;
 
+            const resultado =
+                this.transferenciaService
+                    .realizarTransferenciaInterbancaria(
+                        cuentaOrigen.obtenerNumeroCuenta(),
+                        bancoDestino,
+                        numeroCuentaDestino,
+                        montoTransferencia
+                    );
+
+            this.mostrarResultado(resultado);
+
+            return;
         }
 
+        Consola.error(
+            "El tipo de transferencia no es válido."
+        );
     }
 
+    private mostrarResultado(
+        resultado: {
+            exitoso: boolean;
+            error?: string;
+        }
+    ): void {
+
+        if (!resultado.exitoso) {
+            Consola.error(
+                resultado.error ??
+                "No fue posible realizar la transferencia."
+            );
+
+            return;
+        }
+
+        Consola.exito(
+            "Transferencia realizada correctamente."
+        );
+    }
 }

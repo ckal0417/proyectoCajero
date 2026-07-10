@@ -1,10 +1,19 @@
 import { Usuario } from "../../models/Usuario";
 import { UsuarioRepository } from "../../repositories/UsuarioRepository";
+import { Cuenta } from "../../models/Cuenta";
+
 export class BancoService {
 
     constructor(
         private usuarioRepository: UsuarioRepository
     ) {}
+
+
+    public obtenerCuentasRegistradas(): Cuenta[] {
+        return this.usuarioRepository
+            .obtenerTodos()
+            .map(usuario => usuario.obtenerCuenta());
+    }
 
     public buscarPorTarjeta(numeroTarjeta: string): Usuario | null {
 

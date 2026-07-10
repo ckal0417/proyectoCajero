@@ -2,75 +2,49 @@ import * as readline from "readline";
 import { Cuenta } from "../../models/Cuenta";
 import { CajeroService } from "../../services/cajero/CajeroService";
 import { Consola } from "../../utils/Consola";
-import { TransferenciaLocalMenu } from "./local/TransferenciaLocalMenu";
-import { TransferenciaInterbancariaMenu } from "./interbancaria/TransferenciaInterbancariaMenu";
+import { TipoTransferencia } from "../../enums/TipoTransferencia";
 
 export class TransferenciaMenu {
 
     constructor(
-        private cuenta: Cuenta,
+        private cuentaOrigen: Cuenta,
         private cajeroService: CajeroService,
         private consola: readline.Interface
     ) {}
 
-    public iniciar(callback: () => void): void {
+    public iniciar(
+        callback: () => void
+    ): void {
 
         Consola.limpiar();
-
-        Consola.titulo("TRANSFERENCIAS");
-
-        Consola.informacion("1. Transferencia Local");
-        Consola.informacion("2. Transferencia Interbancaria");
-        Consola.informacion("3. Volver\n");
+        Consola.titulo("TRANSFERENCIA LOCAL");
 
         this.consola.question(
+            "Ingrese el número de la cuenta destino: ",
+            (numeroCuentaDestino: string) => {
 
-            "Seleccione una opción: ",
+                this.consola.question(
+                    "Ingrese el monto: ",
+                    (textoMonto: string) => {
 
-            (opcion: string) => {
+                        const montoTransferencia =
+                            Number(textoMonto);
 
-                switch (opcion) {
+                        this.cajeroService.ejecutar(
+                            "transferir",
+                            this.cuentaOrigen,
+                            TipoTransferencia.LOCAL,
+                            numeroCuentaDestino,
+                            montoTransferencia
+                        );
 
-                    case "1":
-
-                        new TransferenciaLocalMenu(
-
-                            this.cuenta,
-
-                            this.cajeroService,
-
-                            this.consola
-
-                        ).iniciar(callback);
-
-                        break;
-
-                    case "2":
-
-                        new TransferenciaInterbancariaMenu(
-
-                            this.cuenta,
-
-                            this.cajeroService,
-
-                            this.consola
-
-                        ).iniciar(callback);
-
-                        break;
-
-                    default:
-
-                        callback();
-
-                        break;
-
-                }
-
+                        this.consola.question(
+                            "\nPresione ENTER para continuar...",
+                            () => callback()
+                        );
+                    }
+                );
             }
-
         );
-
     }
-
 }

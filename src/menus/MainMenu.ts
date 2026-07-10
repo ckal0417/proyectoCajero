@@ -69,9 +69,9 @@ export class MainMenu {
 
         const cuenta = this.usuario.obtenerCuenta();
 
-        const cuentaRepository = new CuentaRepository([
-            cuenta
-        ]);
+        const cuentasRegistradas = this.bancoService.obtenerCuentasRegistradas();
+
+        const cuentaRepository = new CuentaRepository(cuentasRegistradas);
 
         const transaccionRepository = new TransaccionRepository();
 
@@ -107,6 +107,22 @@ export class MainMenu {
                 )
         );
 
+    eventBus.suscribir(
+        TiposEvento.TRANSFERENCIA_REALIZADA,
+        evento => logSubscriber.manejar(evento)
+    );
+
+    eventBus.suscribir(
+        TiposEvento.TRANSFERENCIA_REALIZADA,
+        evento => auditoriaSubscriber.manejar(evento)
+    );
+
+    eventBus.suscribir(
+        TiposEvento.TRANSFERENCIA_REALIZADA,
+        evento => correoSubscriber.manejar(evento)
+    );
+
+
         eventBus.suscribir(
             TiposEvento.DEPOSITO_REALIZADO,
             evento => logSubscriber.manejar(evento)
@@ -136,6 +152,7 @@ export class MainMenu {
             TiposEvento.RETIRO_REALIZADO,
             evento => correoSubscriber.manejar(evento)
         );
+
 
         const depositoService =
             new DepositoService(
@@ -170,11 +187,12 @@ export class MainMenu {
                 bancoIntermediarioService
             );
 
-        const transferenciaService =
-            new TransferenciaService(
-                transferenciaLocalService,
-                transferenciaInterbancariaService
-            );
+        const transferenciaService = new TransferenciaService(
+            cuentaRepository,
+            transferenciaLocalService,
+            transferenciaInterbancariaService,
+            eventBus
+        );
 
         this.cajeroService =
             new CajeroService(

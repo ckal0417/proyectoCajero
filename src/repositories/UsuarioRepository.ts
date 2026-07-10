@@ -12,8 +12,8 @@ export class UsuarioRepository implements IRepository<Usuario> {
         this.usuarios = [
 
             new Usuario(
-                "Christopher Vera",
-                "4587123412341234",
+                "Cristopher Vera",
+                "122333",
                 "1234",
                 new Cuenta(
                     "100001",
@@ -24,7 +24,7 @@ export class UsuarioRepository implements IRepository<Usuario> {
 
             new Usuario(
                 "Juan Pérez",
-                "4587000000000001",
+                "122334",
                 "4321",
                 new Cuenta(
                     "100002",

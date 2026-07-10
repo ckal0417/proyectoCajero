@@ -1,44 +1,176 @@
-import { Cuenta } from "../../../models/Cuenta";
+import { Resultado, ResultadoOperacion } from "../../../common/Resultado";
+import { CuentaRepository } from "../../../repositories/CuentaRepository";
 import { TransferenciaLocalService } from "./local/TransferenciaLocalService";
 import { TransferenciaInterbancariaService } from "./interbancaria/TransferenciaInterbancariaService";
+import { EventBus } from "../../../events/EventBus";
+import { TiposEvento } from "../../../events/TiposEvento";
+import { Transaccion } from "../../../models/Transaccion";
+import { TipoTransaccion } from "../../../enums/TipoTransaccion";
+import { TransferenciaValidacion } from "../../../utils/validaciones/TransferenciaValidacion";
 
 export class TransferenciaService {
 
     constructor(
+        private cuentaRepository: CuentaRepository,
         private transferenciaLocalService: TransferenciaLocalService,
-        private transferenciaInterbancariaService: TransferenciaInterbancariaService
+        private transferenciaInterbancariaService: TransferenciaInterbancariaService,
+        private eventBus: EventBus
     ) {}
 
     public realizarTransferenciaLocal(
-        cuentaOrigen: Cuenta,
-        cuentaDestino: Cuenta,
-        monto: number
-    ): boolean {
+        numeroCuentaOrigen: string,
+        numeroCuentaDestino: string,
+        montoTransferencia: number
+    ): Resultado<void> {
+
+        const validacion = TransferenciaValidacion.validar(
+            numeroCuentaDestino,
+            montoTransferencia
+        );
+
+        if (!validacion.exitoso) {
+            return ResultadoOperacion.fallido(
+                validacion.error
+            );
+        }
+
+        if (numeroCuentaOrigen === numeroCuentaDestino) {
+            return ResultadoOperacion.fallido(
+                "La cuenta destino no puede ser igual a la cuenta origen."
+            );
+        }
+
+        const cuentaOrigen =
+            this.cuentaRepository.obtenerPorNumero(
+                numeroCuentaOrigen
+            );
+
+        if (!cuentaOrigen) {
+            return ResultadoOperacion.fallido(
+                "La cuenta origen no fue encontrada."
+            );
+        }
+
+        const cuentaDestino =
+            this.cuentaRepository.obtenerPorNumero(
+                numeroCuentaDestino
+            );
+
+        if (!cuentaDestino) {
+            return ResultadoOperacion.fallido(
+                "La cuenta destino no fue encontrada en el banco."
+            );
+        }
+
+        if (montoTransferencia > cuentaOrigen.obtenerSaldo()) {
+            return ResultadoOperacion.fallido(
+                "Saldo insuficiente."
+            );
+        }
 
         this.transferenciaLocalService.transferir(
             cuentaOrigen,
             cuentaDestino,
-            monto
+            montoTransferencia
         );
 
-        return true;
+        this.cuentaRepository.actualizarSaldo(
+            numeroCuentaOrigen,
+            cuentaOrigen.obtenerSaldo()
+        );
 
+        this.cuentaRepository.actualizarSaldo(
+            numeroCuentaDestino,
+            cuentaDestino.obtenerSaldo()
+        );
+
+        const transaccion = new Transaccion(
+            TipoTransaccion.TRANSFERENCIA,
+            montoTransferencia,
+            new Date(),
+            `Transferencia local a la cuenta ${numeroCuentaDestino}`
+        );
+
+        this.eventBus.publicar({
+            nombre: TiposEvento.TRANSFERENCIA_REALIZADA,
+            datos: transaccion
+        });
+
+        return ResultadoOperacion.exitoso(undefined);
     }
 
     public realizarTransferenciaInterbancaria(
-        cuentaOrigen: Cuenta,
+        numeroCuentaOrigen: string,
         bancoDestino: string,
         numeroCuentaDestino: string,
-        monto: number
-    ): boolean {
+        montoTransferencia: number
+    ): Resultado<void> {
 
-        return this.transferenciaInterbancariaService.transferir(
-            cuentaOrigen,
-            bancoDestino,
+        const validacion = TransferenciaValidacion.validar(
             numeroCuentaDestino,
-            monto
+            montoTransferencia
         );
 
-    }
+        if (!validacion.exitoso) {
+            return ResultadoOperacion.fallido(
+                validacion.error
+            );
+        }
 
+        if (bancoDestino.trim().length === 0) {
+            return ResultadoOperacion.fallido(
+                "Debe ingresar el banco destino."
+            );
+        }
+
+        const cuentaOrigen =
+            this.cuentaRepository.obtenerPorNumero(
+                numeroCuentaOrigen
+            );
+
+        if (!cuentaOrigen) {
+            return ResultadoOperacion.fallido(
+                "La cuenta origen no fue encontrada."
+            );
+        }
+
+        if (montoTransferencia > cuentaOrigen.obtenerSaldo()) {
+            return ResultadoOperacion.fallido(
+                "Saldo insuficiente."
+            );
+        }
+
+        const transferenciaRealizada =
+            this.transferenciaInterbancariaService.transferir(
+                cuentaOrigen,
+                bancoDestino,
+                numeroCuentaDestino,
+                montoTransferencia
+            );
+
+        if (!transferenciaRealizada) {
+            return ResultadoOperacion.fallido(
+                "El intermediario rechazó la transferencia."
+            );
+        }
+
+        this.cuentaRepository.actualizarSaldo(
+            numeroCuentaOrigen,
+            cuentaOrigen.obtenerSaldo()
+        );
+
+        const transaccion = new Transaccion(
+            TipoTransaccion.TRANSFERENCIA,
+            montoTransferencia,
+            new Date(),
+            `Transferencia interbancaria a ${bancoDestino}, cuenta ${numeroCuentaDestino}`
+        );
+
+        this.eventBus.publicar({
+            nombre: TiposEvento.TRANSFERENCIA_REALIZADA,
+            datos: transaccion
+        });
+
+        return ResultadoOperacion.exitoso(undefined);
+    }
 }

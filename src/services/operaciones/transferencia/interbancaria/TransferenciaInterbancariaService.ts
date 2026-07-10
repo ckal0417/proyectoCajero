@@ -1,5 +1,6 @@
 import { Cuenta } from "../../../../models/Cuenta";
 import { BancoIntermediarioService } from "../../../Intermediario/BancoIntermediarioService";
+
 export class TransferenciaInterbancariaService {
 
     constructor(
@@ -10,19 +11,24 @@ export class TransferenciaInterbancariaService {
         cuentaOrigen: Cuenta,
         bancoDestino: string,
         numeroCuentaDestino: string,
-        monto: number
+        montoTransferencia: number
     ): boolean {
 
-        cuentaOrigen.retirar(monto);
+        const transferenciaAprobada =
+            this.bancoIntermediarioService.procesarTransferencia(
+                "Banco Principal",
+                bancoDestino,
+                cuentaOrigen.obtenerNumeroCuenta(),
+                numeroCuentaDestino,
+                montoTransferencia
+            );
 
-        return this.bancoIntermediarioService.procesarTransferencia(
-            "Banco Principal",
-            bancoDestino,
-            cuentaOrigen.obtenerNumeroCuenta(),
-            numeroCuentaDestino,
-            monto
-        );
+        if (!transferenciaAprobada) {
+            return false;
+        }
 
+        cuentaOrigen.retirar(montoTransferencia);
+
+        return true;
     }
-
 }

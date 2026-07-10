@@ -5,13 +5,11 @@ export class TransferenciaLocalService {
     public transferir(
         cuentaOrigen: Cuenta,
         cuentaDestino: Cuenta,
-        monto: number
+        montoTransferencia: number
     ): void {
 
-        cuentaOrigen.retirar(monto);
+        cuentaOrigen.retirar(montoTransferencia);
 
-        cuentaDestino.depositar(monto);
-
+        cuentaDestino.depositar(montoTransferencia);
     }
-
 }

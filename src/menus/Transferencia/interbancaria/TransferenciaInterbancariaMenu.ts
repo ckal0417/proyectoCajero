@@ -2,74 +2,58 @@ import * as readline from "readline";
 import { Cuenta } from "../../../models/Cuenta";
 import { CajeroService } from "../../../services/cajero/CajeroService";
 import { Consola } from "../../../utils/Consola";
+import { TipoTransferencia } from "../../../enums/TipoTransferencia";
 
 export class TransferenciaInterbancariaMenu {
 
     constructor(
-        private cuenta: Cuenta,
+        private cuentaOrigen: Cuenta,
         private cajeroService: CajeroService,
         private consola: readline.Interface
     ) {}
 
-    public iniciar(callback: () => void): void {
+    public iniciar(
+        callback: () => void
+    ): void {
 
         Consola.limpiar();
-        Consola.titulo("TRANSFERENCIA INTERBANCARIA");
+        Consola.titulo(
+            "TRANSFERENCIA INTERBANCARIA"
+        );
 
         this.consola.question(
-
             "Ingrese el banco destino: ",
-
-            (banco: string) => {
+            (bancoDestino: string) => {
 
                 this.consola.question(
-
-                    "Ingrese la cuenta destino: ",
-
-                    (cuentaDestino: string) => {
+                    "Ingrese el número de la cuenta destino: ",
+                    (numeroCuentaDestino: string) => {
 
                         this.consola.question(
-
                             "Ingrese el monto: ",
+                            (textoMonto: string) => {
 
-                            (texto: string) => {
-
-                                const monto = Number(texto);
+                                const montoTransferencia =
+                                    Number(textoMonto);
 
                                 this.cajeroService.ejecutar(
-
                                     "transferir",
-
-                                    this.cuenta,
-
-                                    banco,
-
-                                    cuentaDestino,
-
-                                    monto
-
+                                    this.cuentaOrigen,
+                                    TipoTransferencia.INTERBANCARIA,
+                                    bancoDestino,
+                                    numeroCuentaDestino,
+                                    montoTransferencia
                                 );
 
                                 this.consola.question(
-
                                     "\nPresione ENTER para continuar...",
-
                                     () => callback()
-
                                 );
-
                             }
-
                         );
-
                     }
-
                 );
-
             }
-
         );
-
     }
-
 }

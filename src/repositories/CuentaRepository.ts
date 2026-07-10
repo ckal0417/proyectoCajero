@@ -6,36 +6,44 @@ export class CuentaRepository {
         private cuentas: Cuenta[]
     ) {}
 
-    public obtenerPorNumero(numeroCuenta: string): Cuenta | null {
+    public obtenerTodas(): Cuenta[] {
+        return [...this.cuentas];
+    }
 
-        const cuenta = this.cuentas.find(
+    public obtenerPorNumero(
+        numeroCuenta: string
+    ): Cuenta | null {
 
-            cuenta => cuenta.obtenerNumeroCuenta() === numeroCuenta
-
+        const cuentaEncontrada = this.cuentas.find(
+            cuenta =>
+                cuenta.obtenerNumeroCuenta() === numeroCuenta
         );
 
-        return cuenta ?? null;
+        return cuentaEncontrada ?? null;
+    }
 
+    public existe(
+        numeroCuenta: string
+    ): boolean {
+
+        return this.obtenerPorNumero(numeroCuenta) !== null;
     }
 
     public actualizarSaldo(
-
         numeroCuenta: string,
-
         nuevoSaldo: number
+    ): boolean {
 
-    ): void {
+        const cuentaEncontrada = this.obtenerPorNumero(
+            numeroCuenta
+        );
 
-        const cuenta = this.obtenerPorNumero(numeroCuenta);
-
-        if (!cuenta) {
-
-            return;
-
+        if (!cuentaEncontrada) {
+            return false;
         }
 
-        cuenta.establecerSaldo(nuevoSaldo);
+        cuentaEncontrada.establecerSaldo(nuevoSaldo);
 
+        return true;
     }
-
 }
