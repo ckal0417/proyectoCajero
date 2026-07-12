@@ -1,4 +1,5 @@
 import { Evento } from "./Evento";
+import { Consola } from "../utils/Consola";
 
 type CallbackEvento = (evento: Evento) => void;
 
@@ -23,6 +24,19 @@ export class EventBus {
             return;
         }
 
-        lista.forEach(callback => callback(evento));
+        lista.forEach(callback => {
+            try {
+                callback(evento);
+            }
+            catch (error) {
+                const mensaje = error instanceof Error
+                    ? error.message
+                    : "Error desconocido";
+
+                Consola.error(
+                    `No fue posible ejecutar un suscriptor del evento ${evento.nombre}: ${mensaje}`
+                );
+            }
+        });
     }
 }
