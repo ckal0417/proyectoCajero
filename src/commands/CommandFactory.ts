@@ -14,9 +14,9 @@ export class CommandFactory {
 
     public static registrar(
 
-        cajeroService: CajeroService,
+        cajeroService: CajeroService, // a quien se le va 
 
-        services: {
+        services: { // La logica de negocio que implementa cada comando, se inyecta en el commandFactory para que los comandos puedan usarla.
 
             depositoService: DepositoService;
 
