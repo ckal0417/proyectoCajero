@@ -1,8 +1,8 @@
-import { ICommand } from "../interfaces/ICommand";
-import { Cuenta } from "../models/Cuenta";
-import { Consola } from "../utils/Consola";
-import { Formato} from "../utils/Formato";
-import { SaldoService } from "../services/comandos/SaldoService";
+import { ICommand } from "../Application/interfaces/ICommand";
+import { Cuenta } from "../Application/models/Cuenta";
+import { Consola } from "../shared/utils/Consola";
+import { Formato} from "../shared/utils/Formato";
+import { SaldoService } from "../Application/services/comandos/SaldoService";
 export class ConsultarSaldoCommand implements ICommand {
 
     public nombre = "saldo";

@@ -1,9 +1,9 @@
-import { ICommand } from "../interfaces/ICommand";
-import { Cuenta } from "../models/Cuenta";
-import { Consola } from "../utils/Consola";
-import { Formato } from "../utils/Formato";
-import { MontoValidacion } from "../utils/validaciones/MontoValidacion";
-import { RetiroService } from "../services/comandos/RetiroService";
+import { ICommand } from "../Application/interfaces/ICommand";
+import { Cuenta } from "../Application/models/Cuenta";
+import { Consola } from "../shared/utils/Consola";
+import { Formato } from "../shared/utils/Formato";
+import { MontoValidacion } from "../shared/utils/validaciones/MontoValidacion";
+import { RetiroService } from "../Application/services/comandos/RetiroService";
 export class RetirarCommand implements ICommand {
 
     public nombre = "retirar";

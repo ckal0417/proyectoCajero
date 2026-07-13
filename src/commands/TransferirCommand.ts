@@ -1,8 +1,8 @@
-import { ICommand } from "../interfaces/ICommand";
-import { Cuenta } from "../models/Cuenta";
-import { Consola } from "../utils/Consola";
-import { TransferenciaService } from "../services/comandos/transferencia/TransferenciaService";
-import { TipoTransferencia } from "../enums/TipoTransferencia";
+import { ICommand } from "../Application/interfaces/ICommand";
+import { Cuenta } from "../Application/models/Cuenta";
+import { Consola } from "../shared/utils/Consola";
+import { TransferenciaService } from "../Application/services/comandos/transferencia/TransferenciaService";
+import { TipoTransferencia } from "../Domain/enums/TipoTransferencia";
 export class TransferirCommand implements ICommand {
 
     public nombre: string = "transferir";

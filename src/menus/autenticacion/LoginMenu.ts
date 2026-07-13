@@ -1,7 +1,7 @@
 import * as readline from "readline";
-import { BancoService } from "../../services/BancoService";
-import { Usuario } from "../../models/Usuario";
-import { Consola } from "../../utils/Consola";
+import { BancoService } from "../../Application/services/BancoService";
+import { Usuario } from "../../Application/models/Usuario";
+import { Consola } from "../../shared/utils/Consola";
 
 export class LoginMenu {
 

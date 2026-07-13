@@ -1,7 +1,7 @@
 import * as readline from "readline";
-import { BancoService } from "./services/BancoService";
+import { BancoService } from "./Application/services/BancoService";
 import { MainMenu } from "./menus/MainMenu";
-import { UsuarioRepository } from "./repositories/UsuarioRepository";
+import { UsuarioRepository } from "./Infrastructure/repositories/UsuarioRepository";
 
 const usuarioRepository = new UsuarioRepository();
 

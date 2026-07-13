@@ -1,9 +1,9 @@
-import { ICommand } from "../interfaces/ICommand";
-import { Cuenta } from "../models/Cuenta";
-import { Consola } from "../utils/Consola";
-import { Formato } from "../utils/Formato";
-import { MontoValidacion } from "../utils/validaciones/MontoValidacion";
-import { DepositoService } from "../services/comandos/DepositoService";
+import { ICommand } from "../Application/interfaces/ICommand";
+import { Cuenta } from "../Application/models/Cuenta";
+import { Consola } from "../shared/utils/Consola";
+import { Formato } from "../shared/utils/Formato";
+import { MontoValidacion } from "../shared/utils/validaciones/MontoValidacion";
+import { DepositoService } from "../Application/services/comandos/DepositoService";
 
 export class DepositarCommand implements ICommand {
 
