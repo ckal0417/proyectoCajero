@@ -1,4 +1,4 @@
-import { Cuenta } from "../../Application/models/Cuenta";
+import { Cuenta } from "../../Domain/Entities/Cuenta";
 
 export class CuentaRepository {
 

@@ -1,5 +1,5 @@
-import { ICommand } from "../Application/interfaces/ICommand";
-import { Cuenta } from "../Application/models/Cuenta";
+﻿import { ICommand } from "../Application/interfaces/ICommand";
+import { Cuenta } from "../Domain/Entities/Cuenta";
 import { Consola } from "../shared/utils/Consola";
 import { TransferenciaService } from "../Application/services/comandos/transferencia/TransferenciaService";
 import { TipoTransferencia } from "../Domain/enums/TipoTransferencia";
@@ -29,7 +29,7 @@ export class TransferirCommand implements ICommand {
 
             const resultado =
                 this.transferenciaService.realizarTransferenciaLocal(
-                    cuentaOrigen.obtenerNumeroCuenta(),
+                    cuentaOrigen.obtenerNumeroCuenta().toString(),
                     numeroCuentaDestino,
                     montoTransferencia
                 );
@@ -56,7 +56,7 @@ export class TransferirCommand implements ICommand {
             const resultado =
                 this.transferenciaService
                     .realizarTransferenciaInterbancaria(
-                        cuentaOrigen.obtenerNumeroCuenta(),
+                        cuentaOrigen.obtenerNumeroCuenta().toString(),
                         bancoDestino,
                         numeroCuentaDestino,
                         montoTransferencia
@@ -68,7 +68,7 @@ export class TransferirCommand implements ICommand {
         }
 
         Consola.error(
-            "El tipo de transferencia no es válido."
+            "El tipo de transferencia no es vÃ¡lido."
         );
     }
 

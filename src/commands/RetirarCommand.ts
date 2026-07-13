@@ -1,5 +1,5 @@
-import { ICommand } from "../Application/interfaces/ICommand";
-import { Cuenta } from "../Application/models/Cuenta";
+﻿import { ICommand } from "../Application/interfaces/ICommand";
+import { Cuenta } from "../Domain/Entities/Cuenta";
 import { Consola } from "../shared/utils/Consola";
 import { Formato } from "../shared/utils/Formato";
 import { MontoValidacion } from "../shared/utils/validaciones/MontoValidacion";

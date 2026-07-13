@@ -1,6 +1,7 @@
 import { IRepository } from "../../Application/interfaces/IRepository";
 import { Usuario } from "../../Application/models/Usuario";
-import { Cuenta } from "../../Application/models/Cuenta";
+import { Cliente } from "../../Domain/Entities/Cliente";
+import { Cuenta } from "../../Domain/Entities/Cuenta";
 import { TipoCuenta } from "../../Domain/enums/TipoCuenta";
 
 export class UsuarioRepository implements IRepository<Usuario> {

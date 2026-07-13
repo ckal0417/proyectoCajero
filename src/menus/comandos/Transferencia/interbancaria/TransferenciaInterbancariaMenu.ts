@@ -1,5 +1,5 @@
 import * as readline from "readline";
-import { Cuenta } from "../../../../Application/models/Cuenta";
+import { Cuenta } from "../../../../Domain/Entities/Cuenta";
 import { CajeroService } from "../../../../Application/services/CajeroService";
 import { Consola } from "../../../../shared/utils/Consola";
 import { TipoTransferencia } from "../../../../Domain/enums/TipoTransferencia";

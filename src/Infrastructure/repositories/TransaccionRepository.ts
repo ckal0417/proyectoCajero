@@ -1,4 +1,4 @@
-import { Transaccion } from "../../Application/models/Transaccion";
+import { Transaccion } from "../../Domain/Entities/Transaccion";
 
 export class TransaccionRepository {
     private transacciones: Transaccion[] = [];
