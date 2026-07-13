@@ -1,6 +1,6 @@
-import { Cuenta } from "../../models/Cuenta";
-import { ICommand } from "../../interfaces/ICommand";
-import { Consola } from "../../utils/Consola";
+import { Cuenta } from "../models/Cuenta";
+import { ICommand } from "../interfaces/ICommand";
+import { Consola } from "../utils/Consola";
 export class CajeroService {
     private comandos: ICommand[] = [];
 

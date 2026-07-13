@@ -1,8 +1,8 @@
 import * as readline from "readline";
-import { Cuenta } from "../../models/Cuenta";
-import { CajeroService } from "../../services/cajero/CajeroService";
-import { Consola } from "../../utils/Consola";
-import { TipoTransferencia } from "../../enums/TipoTransferencia";
+import { Cuenta } from "../../../models/Cuenta";
+import { CajeroService } from "../../../services/CajeroService";
+import { Consola } from "../../../utils/Consola";
+import { TipoTransferencia } from "../../../enums/TipoTransferencia";
 
 export class TransferenciaMenu {
 

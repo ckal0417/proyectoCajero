@@ -1,9 +1,9 @@
-import { Resultado, ResultadoOperacion } from "../../../models/Resultado";
-import { CuentaRepository } from "../../../repositories/CuentaRepository";
-import { EventBus } from "../../../events/EventBus";
-import { TiposEvento } from "../../../events/TiposEvento";
-import { Transaccion } from "../../../models/Transaccion";
-import { TipoTransaccion } from "../../../enums/TipoTransaccion";
+import { Resultado, ResultadoOperacion } from "../../models/Resultado";
+import { CuentaRepository } from "../../repositories/CuentaRepository";
+import { EventBus } from "../../events/EventBus";
+import { TiposEvento } from "../../events/TiposEvento";
+import { Transaccion } from "../../models/Transaccion";
+import { TipoTransaccion } from "../../enums/TipoTransaccion";
 
 export class DepositoService {
     constructor(

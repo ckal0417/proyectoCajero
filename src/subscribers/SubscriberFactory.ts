@@ -1,13 +1,12 @@
-import { EventBus } from "../../events/EventBus";
-import { Evento } from "../../events/Evento";
-import { TiposEvento } from "../../events/TiposEvento";
-import { Transaccion } from "../../models/Transaccion";
-import { TransaccionRepository } from "../../repositories/TransaccionRepository";
-import { HistorialSubscriber } from "../HistorialSubscriber";
-import { LogSubscriber } from "../LogSubscriber";
-import { AuditoriaSubscriber } from "../AuditoriaSubscriber";
-import { CorreoSubscriber } from "../CorreoSubscriber";
-
+import { EventBus } from "../events/EventBus";
+import { Evento } from "../events/Evento";
+import { TiposEvento } from "../events/TiposEvento";
+import { Transaccion } from "../models/Transaccion";
+import { TransaccionRepository } from "../repositories/TransaccionRepository";
+import { HistorialSubscriber } from "./HistorialSubscriber";
+import { LogSubscriber } from "./LogSubscriber";
+import { AuditoriaSubscriber } from "./AuditoriaSubscriber";
+import { CorreoSubscriber } from "./CorreoSubscriber";
 export class SubscriberFactory {
 
     public static crear(

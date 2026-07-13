@@ -1,5 +1,5 @@
 import * as readline from "readline";
-import { BancoService } from "./services/banco/BancoService";
+import { BancoService } from "./services/BancoService";
 import { MainMenu } from "./menus/MainMenu";
 import { UsuarioRepository } from "./repositories/UsuarioRepository";
 

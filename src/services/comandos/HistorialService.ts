@@ -1,6 +1,6 @@
-import { Resultado, ResultadoOperacion } from "../../../models/Resultado";
-import { TransaccionRepository } from "../../../repositories/TransaccionRepository";
-import { Transaccion } from "../../../models/Transaccion";
+import { Resultado, ResultadoOperacion } from "../../models/Resultado";
+import { TransaccionRepository } from "../../repositories/TransaccionRepository";
+import { Transaccion } from "../../models/Transaccion";
 
 export class HistorialService {
     constructor(

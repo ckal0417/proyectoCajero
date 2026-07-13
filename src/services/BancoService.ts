@@ -1,6 +1,6 @@
-import { Usuario } from "../../models/Usuario";
-import { UsuarioRepository } from "../../repositories/UsuarioRepository";
-import { Cuenta } from "../../models/Cuenta";
+import { Usuario } from "../models/Usuario";
+import { UsuarioRepository } from "../repositories/UsuarioRepository";
+import { Cuenta } from "../models/Cuenta";
 
 export class BancoService {
 

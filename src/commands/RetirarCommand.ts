@@ -3,8 +3,7 @@ import { Cuenta } from "../models/Cuenta";
 import { Consola } from "../utils/Consola";
 import { Formato } from "../utils/Formato";
 import { MontoValidacion } from "../utils/validaciones/MontoValidacion";
-import { RetiroService } from "../services/comandos/retiro/RetiroService";
-
+import { RetiroService } from "../services/comandos/RetiroService";
 export class RetirarCommand implements ICommand {
 
     public nombre = "retirar";

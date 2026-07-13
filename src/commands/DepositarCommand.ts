@@ -3,7 +3,7 @@ import { Cuenta } from "../models/Cuenta";
 import { Consola } from "../utils/Consola";
 import { Formato } from "../utils/Formato";
 import { MontoValidacion } from "../utils/validaciones/MontoValidacion";
-import { DepositoService } from "../services/comandos/deposito/DepositoService";
+import { DepositoService } from "../services/comandos/DepositoService";
 
 export class DepositarCommand implements ICommand {
 
