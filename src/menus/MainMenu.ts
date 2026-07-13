@@ -17,12 +17,14 @@ export class MainMenu {
     private usuario: Usuario | null = null;
 
     private cajeroService: CajeroService | null = null;
-
+// Recibe dos cosas inyectadas de dependencias ,Main menu no crea
+// sus propias dependencias, las recibe ya armadas.
     constructor(
         private bancoService: BancoService,
         private consola: readline.Interface
     ) {}
-
+// Crea el loginMenu y le pasa un callback
+//Cuando el loginMenu  sea exitoso, ese callback guarda el usuario autenticado y llama a prepararSesion
     public iniciar(): void {
 
         const loginMenu = new LoginMenu(
@@ -41,7 +43,7 @@ export class MainMenu {
         );
 
     }
-
+// Aqui usa sesionFactory.crear para construir el cajeroService de ese usuario.
     private prepararSesion(): void {
 
         if (!this.usuario) {
@@ -62,7 +64,8 @@ export class MainMenu {
         this.mostrarMenu();
 
     }
-
+// Limpia consola ,muestra la cabecera y crea un opcionesMenu que le pide al 
+//usuario que elija una opcion "1,2,3"  y llama a ejecutarOpcion con la opcion elegida.
     private mostrarMenu(): void {
 
         if (!this.usuario || !this.cajeroService) {
