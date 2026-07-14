@@ -276,10 +276,8 @@ Ejemplo de log:
 
 ## 🚀 Próximos Pasos
 
-- [ ] Integrar usuarios desde PostgreSQL (actualmente en memoria)
 - [ ] Implementar bcrypt para hash de PIN en producción
 - [ ] Agregar endpoints adicionales (consultar transferencias, generar reportes)
-- [ ] Implementar rate limiting
 - [ ] Agregar tests unitarios e integración
 - [ ] Desplegar en producción con Docker
 
