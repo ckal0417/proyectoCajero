@@ -1,9 +1,9 @@
-import { CajeroService } from "../Application/services/CajeroService";
-import { DepositoService } from "../Application/services/comandos/DepositoService";
-import { RetiroService } from "../Application/services/comandos/RetiroService";
-import { SaldoService } from "../Application/services/comandos/SaldoService";
-import { HistorialService } from "../Application/services/comandos/HistorialService";
-import { TransferenciaService } from "../Application/services/comandos/transferencia/TransferenciaService";
+import { CajeroService } from "../Services/CajeroService";
+import { DepositoService } from "../../../Application/services/comandos/DepositoService";
+import { RetiroService } from "../../../Application/services/comandos/RetiroService";
+import { SaldoService } from "../../../Application/services/comandos/SaldoService";
+import { HistorialService } from "../../../Application/services/comandos/HistorialService";
+import { TransferenciaService } from "../../../Application/services/comandos/transferencia/TransferenciaService";
 import { ConsultarSaldoCommand } from "./ConsultarSaldoCommand";
 import { DepositarCommand } from "./DepositarCommand";
 import { RetirarCommand } from "./RetirarCommand";

@@ -4,13 +4,13 @@ import { BancoService } from "../../Application/services/BancoService";
 import { CajeroService } from "../../Application/services/CajeroService";
 import { SesionFactory } from "../../Application/bootstrap/SesionFactory";
 import { Consola } from "../../shared/utils/Consola";
-import { LoginMenu } from "./autenticacion/LoginMenu";
+import { LoginMenu } from "./Autenticacion/LoginMenu";
 import { DepositoMenu } from "./comandos/DepositoMenu";
 import { RetiroMenu } from "./comandos/RetiroMenu";
 import { HistorialMenu } from "./comandos/HistorialMenu";
 import { TransferenciaMenu } from "./comandos/Transferencia/TransferenciaMenu";
-import { CabeceraMenu } from "./common/CabeceraMenu";
-import { OpcionesMenu } from "./common/OpcionesMenu";
+import { CabeceraMenu } from "./Common/CabeceraMenu";
+import { OpcionesMenu } from "./Common/OpcionesMenu";
 
 export class MainMenu {
 

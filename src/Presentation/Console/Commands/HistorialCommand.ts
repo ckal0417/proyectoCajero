@@ -1,6 +1,6 @@
-import { ICommand } from "../Application/interfaces/ICommand";
-import { Consola } from "../shared/utils/Consola";
-import { HistorialService } from "../Application/services/comandos/HistorialService";
+import { ICommand } from "../Interfaces/ICommand";
+import { Consola } from "../../../utils/Consola";
+import { HistorialService } from "../../../Application/services/comandos/HistorialService";
 
 export class HistorialCommand implements ICommand {
 
@@ -11,8 +11,6 @@ export class HistorialCommand implements ICommand {
     ) {}
 
     public ejecutar(..._parametros: unknown[]): void {
-
-        Consola.titulo("HISTORIAL");
 
         const resultado = this.historialService.ejecutar();
 
@@ -31,7 +29,5 @@ export class HistorialCommand implements ICommand {
                 transaccion.mostrar()
             );
         });
-
     }
-
 }
