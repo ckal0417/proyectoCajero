@@ -1,19 +1,24 @@
 export class NumeroTarjeta {
     private static readonly LONGITUD = 16;
     private static readonly PATRON = /^\d{16}$/;
+    private static readonly VALIDAR_CHECKSUM = process.env.VALIDAR_LUHN_TARJETA === 'true';
   
     private constructor(private readonly valor: string) {}
   
     static desde(valor: string): NumeroTarjeta {
-      if (!NumeroTarjeta.PATRON.test(valor)) {
+      const valorNormalizado = valor.replace(/[\s-]/g, '');
+
+      if (!NumeroTarjeta.PATRON.test(valorNormalizado)) {
         throw new Error(
           `El número de tarjeta debe tener exactamente ${NumeroTarjeta.LONGITUD} dígitos`,
         );
       }
-      if (!NumeroTarjeta.pasaLuhn(valor)) {
+
+      if (NumeroTarjeta.VALIDAR_CHECKSUM && !NumeroTarjeta.pasaLuhn(valorNormalizado)) {
         throw new Error('El número de tarjeta no es válido (falla checksum)');
       }
-      return new NumeroTarjeta(valor);
+
+      return new NumeroTarjeta(valorNormalizado);
     }
     
   /** Algoritmo de Luhn: el mismo checksum que usan las redes de tarjetas reales */

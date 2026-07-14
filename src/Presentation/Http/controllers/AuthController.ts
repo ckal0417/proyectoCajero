@@ -85,6 +85,14 @@ export async function loginController(req: AuthRequest, res: Response): Promise<
             },
         });
     } catch (error) {
+        if (error instanceof Error && (
+            error.message.includes('número de tarjeta') ||
+            error.message.includes('PIN')
+        )) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+
         logger.error('Error en login:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
