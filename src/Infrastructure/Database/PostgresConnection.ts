@@ -1,4 +1,5 @@
 
+import 'dotenv/config';
 import { Pool } from 'pg';
 
 export class PostgresConnection {
@@ -10,8 +11,8 @@ export class PostgresConnection {
                 host: process.env.DB_HOST ?? "localhost",
                 port: Number(process.env.DB_PORT ?? 5432),
                 database: process.env.DB_NAME ?? "bancofuego",
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD,
+                user: process.env.DB_USER ?? 'postgres',
+                password: process.env.DB_PASSWORD ?? 'Admin123456',
             });
         }
         return PostgresConnection.instancia; }
