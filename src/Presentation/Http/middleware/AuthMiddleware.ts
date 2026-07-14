@@ -56,6 +56,6 @@ export function generarToken(usuarioId: string, numeroTarjeta: string): string {
     return jwt.sign(
         { usuarioId, numeroTarjeta },
         process.env.JWT_SECRET || 'secret-key',
-        { expiresIn: '24h' }
+        { expiresIn: '1h' }
     );
 }
