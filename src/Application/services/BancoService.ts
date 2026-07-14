@@ -27,9 +27,9 @@ export class BancoService {
         usuario: Usuario,
         pin: string
     ): boolean {
-
+        // Para desarrollo: validación en texto plano
+        // TODO: En producción, usar bcrypt.compare() con UsuarioRepository.verificarPin()
         return usuario.obtenerPin() === pin;
-
     }
 
     public autenticar(
@@ -40,15 +40,11 @@ export class BancoService {
         const usuario = this.buscarPorTarjeta(numeroTarjeta);
 
         if (!usuario) {
-
             return null;
-
         }
 
         if (!this.validarPin(usuario, pin)) {
-
             return null;
-
         }
 
         return usuario;

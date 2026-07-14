@@ -25,7 +25,7 @@ export class RetirarCommand implements ICommand {
         }
 
         const resultado = this.retiroService.ejecutar(
-            cuenta.obtenerNumeroCuenta(),
+            cuenta.obtenerNumeroCuenta().toString(),
             validacion.valor
         );
 
@@ -39,7 +39,7 @@ export class RetirarCommand implements ICommand {
         Consola.informacion("");
 
         Consola.informacion(
-            `Saldo actual: ${Formato.dinero(cuenta.obtenerSaldo())}`
+            `Saldo actual: ${Formato.dinero(cuenta.obtenerSaldo().toNumber())}`
         );
 
     }

@@ -1,7 +1,7 @@
-import { TipoCuenta } from "../Enums/TiposDominio";
+import { TipoCuenta } from "../enums/TiposDominio";
 import { Dinero } from "../Value-Objects/Dinero";
 import { NumeroCuenta } from "../Value-Objects/NumeroCuenta";
-import { CuentaInactivaError, FondosInsuficientesError, MontoInvalidoError } from "../../Shared/Errors";
+import { CuentaInactivaError, FondosInsuficientesError, MontoInvalidoError } from "../../shared/Errors";
 
 
 /** Entidad Cuenta — el AGGREGATE ROOT más importante del dominio.*/

@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { TarjetaRepositoryPostgres } from '../../Database/Repositories/TarjetaRepositoryPostgres';
+import { TarjetaRepositoryPostgres } from '../../../Infrastructure/Database/Repositories/TarjetaRepositoryPostgres';
 import { NumeroTarjeta } from '../../../Domain/Value-Objects/NumeroTarjeta';
 
 export class TarjetaController {

@@ -1,44 +1,185 @@
 import { Router } from 'express';
-import { CuentaController } from './controllers/CuentaController';
-import { RetiroController } from './controllers/RetiroController';
-import { DepositoController } from './controllers/DepositoController';
-import { TarjetaController } from './controllers/TarjetaController';
-import { TransferenciaController } from './controllers/TransferenciaController';
-import { validateBody, validateParams } from './validation';
-import { serveOpenApiSpec, serveSwaggerUi } from './swagger';
+import { loginController } from './controllers/AuthController';
+import {
+    obtenerSaldoController,
+    depositarController,
+    retirarController,
+    transferirController,
+    obtenerHistorialController,
+} from './controllers/OperacionesController';
+import { verificarToken } from './middleware/AuthMiddleware';
 
 const router = Router();
-const cuentaController = new CuentaController();
-const retiroController = new RetiroController();
-const depositoController = new DepositoController();
-const tarjetaController = new TarjetaController();
-const transferenciaController = new TransferenciaController();
 
-router.get('/health', (_req, res) => {
-    res.status(200).json({ status: 'ok' });
-});
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Autentica un usuario
+ *     tags: [Autenticación]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               numeroTarjeta:
+ *                 type: string
+ *                 example: "4111111111111111"
+ *               pin:
+ *                 type: string
+ *                 example: "1234"
+ *     responses:
+ *       200:
+ *         description: Login exitoso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 usuario:
+ *                   type: object
+ *       401:
+ *         description: Credenciales inválidas
+ */
+router.post('/auth/login', loginController);
 
-router.get('/docs', serveSwaggerUi);
-router.get('/openapi.json', serveOpenApiSpec);
+/**
+ * @swagger
+ * /operaciones/saldo:
+ *   get:
+ *     summary: Obtiene el saldo de la cuenta
+ *     tags: [Operaciones]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Saldo obtenido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 saldo:
+ *                   type: number
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/operaciones/saldo', verificarToken, obtenerSaldoController);
 
-router.get('/cuentas/:id', validateParams(['id']), (req, res) => {
-    void cuentaController.obtenerCuenta(req, res);
-});
+/**
+ * @swagger
+ * /operaciones/depositar:
+ *   post:
+ *     summary: Realiza un depósito
+ *     tags: [Operaciones]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               monto:
+ *                 type: number
+ *                 example: 100
+ *     responses:
+ *       200:
+ *         description: Depósito exitoso
+ *       400:
+ *         description: Monto inválido
+ *       401:
+ *         description: No autorizado
+ */
+router.post('/operaciones/depositar', verificarToken, depositarController);
 
-router.post('/retiros', validateBody(['numeroTarjeta', 'pin', 'monto', 'idCajero']), (req, res, next) => {
-    void retiroController.retirar(req, res, next);
-});
+/**
+ * @swagger
+ * /operaciones/retirar:
+ *   post:
+ *     summary: Realiza un retiro
+ *     tags: [Operaciones]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               monto:
+ *                 type: number
+ *                 example: 50
+ *     responses:
+ *       200:
+ *         description: Retiro exitoso
+ *       400:
+ *         description: Fondos insuficientes o monto inválido
+ *       401:
+ *         description: No autorizado
+ */
+router.post('/operaciones/retirar', verificarToken, retirarController);
 
-router.post('/cuentas/:id/depositos', validateParams(['id']), validateBody(['monto']), (req, res, next) => {
-    void depositoController.depositar(req, res, next);
-});
+/**
+ * @swagger
+ * /operaciones/transferir:
+ *   post:
+ *     summary: Realiza una transferencia
+ *     tags: [Operaciones]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               numeroCuentaDestino:
+ *                 type: string
+ *                 example: "2200000002"
+ *               monto:
+ *                 type: number
+ *                 example: 200
+ *     responses:
+ *       200:
+ *         description: Transferencia exitosa
+ *       400:
+ *         description: Cuenta no encontrada o fondos insuficientes
+ *       401:
+ *         description: No autorizado
+ */
+router.post('/operaciones/transferir', verificarToken, transferirController);
 
-router.post('/transferencias', validateBody(['origenId', 'destinoId', 'monto']), (req, res, next) => {
-    void transferenciaController.transferir(req, res, next);
-});
-
-router.get('/tarjetas/:numeroTarjeta/estado', validateParams(['numeroTarjeta']), (req, res) => {
-    void tarjetaController.estado(req, res);
-});
+/**
+ * @swagger
+ * /operaciones/historial:
+ *   get:
+ *     summary: Obtiene el historial de transacciones
+ *     tags: [Operaciones]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Historial obtenido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 historial:
+ *                   type: array
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/operaciones/historial', verificarToken, obtenerHistorialController);
 
 export default router;

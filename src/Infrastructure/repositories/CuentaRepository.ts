@@ -1,49 +1,23 @@
-import { Cuenta } from "../../Domain/Entities/Cuenta";
+import { Cuenta } from '../../Application/models/Cuenta';
 
 export class CuentaRepository {
+    constructor(private readonly cuentas: Cuenta[] = []) {}
 
-    constructor(
-        private cuentas: Cuenta[]
-    ) {}
+    public obtenerPorNumero(numeroCuenta: string): Cuenta | null {
+        return this.cuentas.find((cuenta) => cuenta.obtenerNumeroCuenta() === numeroCuenta) ?? null;
+    }
+
+    public actualizarSaldo(numeroCuenta: string, nuevoSaldo: number): void {
+        const cuenta = this.obtenerPorNumero(numeroCuenta);
+
+        if (!cuenta) {
+            return;
+        }
+
+        cuenta.establecerSaldo(nuevoSaldo);
+    }
 
     public obtenerTodas(): Cuenta[] {
         return [...this.cuentas];
-    }
-
-    public obtenerPorNumero(
-        numeroCuenta: string
-    ): Cuenta | null {
-
-        const cuentaEncontrada = this.cuentas.find(
-            cuenta =>
-                cuenta.obtenerNumeroCuenta() === numeroCuenta
-        );
-
-        return cuentaEncontrada ?? null;
-    }
-
-    public existe(
-        numeroCuenta: string
-    ): boolean {
-
-        return this.obtenerPorNumero(numeroCuenta) !== null;
-    }
-
-    public actualizarSaldo(
-        numeroCuenta: string,
-        nuevoSaldo: number
-    ): boolean {
-
-        const cuentaEncontrada = this.obtenerPorNumero(
-            numeroCuenta
-        );
-
-        if (!cuentaEncontrada) {
-            return false;
-        }
-
-        cuentaEncontrada.establecerSaldo(nuevoSaldo);
-
-        return true;
     }
 }

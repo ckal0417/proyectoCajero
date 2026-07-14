@@ -3,7 +3,7 @@ import { ICuentaRepository } from "../../../Application/Ports/ICuentaRepository"
 import { Cuenta } from "../../../Domain/Entities/Cuenta";
 import { Dinero } from "../../../Domain/Value-Objects/Dinero";
 import { NumeroCuenta } from "../../../Domain/Value-Objects/NumeroCuenta";
-import { TipoCuenta } from "../../../Domain/Enums/TiposDominio";
+import { TipoCuenta } from "../../../Domain/enums/TiposDominio";
 import { PostgresConnection } from "../PostgresConnection";
 import { CuentaQueries } from "../Queries/CuentaQuerie";
 

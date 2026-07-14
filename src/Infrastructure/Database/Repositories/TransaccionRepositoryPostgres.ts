@@ -1,7 +1,7 @@
 import { ITransaccionRepository } from '../../../Application/Ports/ITransaccionRepository';
 import { Transaccion } from '../../../Domain/Entities/Transaccion';
 import { Dinero } from '../../../Domain/Value-Objects/Dinero';
-import { TipoTransaccion, EstadoTransaccion } from '../../../Domain/Enums/TiposDominio';
+import { TipoTransaccion, EstadoTransaccion } from "../../../Domain/enums/TiposDominio";
 import { PostgresConnection } from '../PostgresConnection';
 import { TransaccionQueries } from '../Queries/TransaccionQuerie';
 

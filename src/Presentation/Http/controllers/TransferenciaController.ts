@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { CuentaRepositoryPostgres } from '../../Database/Repositories/CuentaRepositoryPostgres';
+import { CuentaRepositoryPostgres } from '../../../Infrastructure/Database/Repositories/CuentaRepositoryPostgres';
 import { Dinero } from '../../../Domain/Value-Objects/Dinero';
 import { Cuenta } from '../../../Domain/Entities/Cuenta';
 

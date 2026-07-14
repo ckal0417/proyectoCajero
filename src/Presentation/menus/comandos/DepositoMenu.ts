@@ -1,7 +1,7 @@
 import * as readline from "readline";
-import { CajeroService } from "../../Application/services/CajeroService";
-import { Cuenta } from "../../Domain/Entities/Cuenta";
-import { Consola } from "../../shared/utils/Consola";
+import { CajeroService } from "../../../Application/services/CajeroService";
+import { Cuenta } from "../../../Application/models/Cuenta";
+import { Consola } from "../../../shared/utils/Consola";
 
 export class DepositoMenu {
 

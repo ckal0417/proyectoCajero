@@ -26,7 +26,7 @@ export class DepositarCommand implements ICommand {
         }
 
         const resultado = this.depositoService.ejecutar(
-            cuenta.obtenerNumeroCuenta(),
+            cuenta.obtenerNumeroCuenta().toString(),
             validacion.valor
         );
 
@@ -40,7 +40,7 @@ export class DepositarCommand implements ICommand {
         Consola.informacion("");
 
         Consola.informacion(
-            `Saldo actual: ${Formato.dinero(cuenta.obtenerSaldo())}`
+            `Saldo actual: ${Formato.dinero(cuenta.obtenerSaldo().toNumber())}`
         );
 
     }

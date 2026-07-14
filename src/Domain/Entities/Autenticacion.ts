@@ -1,6 +1,6 @@
 import type { PinTextoPlano } from "../Value-Objects/Pin";
 import type { IPinHasher } from "../Value-Objects/PinHasher";
-import { BusinessRuleError } from "../../Shared/Errors";
+import { BusinessRuleError } from "../../shared/Errors";
 
 // Entidad Autenticacion.
 

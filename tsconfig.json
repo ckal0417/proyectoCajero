@@ -10,5 +10,5 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src", "src/menus/.ts"]
+  "include": ["src", "src/Presentation/menus/.ts"]
 }

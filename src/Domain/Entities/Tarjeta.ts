@@ -1,6 +1,6 @@
-import { TipoTarjeta } from "../Enums/TiposDominio";
+import { TipoTarjeta } from "../enums/TiposDominio";
 import { NumeroTarjeta } from "../Value-Objects/NumeroTarjeta";
-import { ValidationError, TarjetaBloqueadaError, TarjetaVencidaError } from "../../Shared/Errors";
+import { ValidationError, TarjetaBloqueadaError, TarjetaVencidaError } from "../../shared/Errors";
 
 export class Tarjeta {
   private constructor(

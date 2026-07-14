@@ -7,7 +7,7 @@ export class HistorialService {
         private transaccionRepository: TransaccionRepository
     ) {}
 
-    public ejecutar(): Resultado<Transaccion[]> {
+    public ejecutar(): Resultado<any[]> {
         return ResultadoOperacion.exitoso(
             this.transaccionRepository.obtenerTodas()
         );

@@ -14,9 +14,9 @@ export class ServiceFactory {
 
     public static crear(
 
-        cuentaRepository: CuentaRepository,
+        cuentaRepository: any, // Flexible: acepta CuentaRepository o CuentaRepositoryPostgres
 
-        transaccionRepository: TransaccionRepository,
+        transaccionRepository: any, // Flexible: acepta TransaccionRepository o TransaccionRepositoryPostgres
 
         eventBus: EventBus
 

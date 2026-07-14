@@ -1,7 +1,7 @@
 // Entities/Transaccion.ts
-import { TipoTransaccion, EstadoTransaccion } from "../Enums/TiposDominio";
+import { TipoTransaccion, EstadoTransaccion } from "../enums/TiposDominio";
 import { Dinero } from "../Value-Objects/Dinero";
-import { OperacionNoSoportadaError } from "../../Shared/Errors";
+import { OperacionNoSoportadaError } from "../../shared/Errors";
 
 export class Transaccion {
 

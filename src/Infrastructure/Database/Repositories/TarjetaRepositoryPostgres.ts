@@ -1,7 +1,7 @@
 import { ITarjetaRepository } from '../../../Application/Ports/ITarjetaRepository';
 import { Tarjeta } from '../../../Domain/Entities/Tarjeta';
 import { NumeroTarjeta } from '../../../Domain/Value-Objects/NumeroTarjeta';
-import { TipoTarjeta } from '../../../Domain/Enums/TiposDominio';
+import { TipoTarjeta } from "../../../Domain/enums/TiposDominio";
 import { PostgresConnection } from '../PostgresConnection';
 import { TarjetaQueries } from '../Queries/TarjetaQuerie';
 

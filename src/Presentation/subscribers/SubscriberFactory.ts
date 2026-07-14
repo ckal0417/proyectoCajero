@@ -1,8 +1,7 @@
-import { EventBus } from "../shared/events/EventBus";
-import { Evento } from "../shared/events/Evento";
-import { TiposEvento } from "../shared/events/TiposEvento";
-import { Transaccion } from "../Domain/Entities/Transaccion";
-import { TransaccionRepository } from "../Infrastructure/repositories/TransaccionRepository";
+import { EventBus } from "../../shared/events/EventBus";
+import { Evento } from "../../shared/events/Evento";
+import { TiposEvento } from "../../shared/events/TiposEvento";
+import { Transaccion } from "../../Domain/Entities/Transaccion";
 import { HistorialSubscriber } from "./HistorialSubscriber";
 import { LogSubscriber } from "./LogSubscriber";
 import { AuditoriaSubscriber } from "./AuditoriaSubscriber";
@@ -11,7 +10,7 @@ export class SubscriberFactory {
 
     public static crear(
         eventBus: EventBus,
-        transaccionRepository: TransaccionRepository
+        transaccionRepository: any // Flexible: acepta TransaccionRepository o TransaccionRepositoryPostgres
     ): void {
 
         const historialSubscriber =

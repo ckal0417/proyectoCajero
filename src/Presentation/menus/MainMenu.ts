@@ -1,9 +1,9 @@
 import * as readline from "readline";
-import { Usuario } from "../Application/models/Usuario";
-import { BancoService } from "../Application/services/BancoService";
-import { CajeroService } from "../Application/services/CajeroService";
-import { SesionFactory } from "../bootstrap/SesionFactory";
-import { Consola } from "../shared/utils/Consola";
+import { Usuario } from "../../Application/models/Usuario";
+import { BancoService } from "../../Application/services/BancoService";
+import { CajeroService } from "../../Application/services/CajeroService";
+import { SesionFactory } from "../../Application/bootstrap/SesionFactory";
+import { Consola } from "../../shared/utils/Consola";
 import { LoginMenu } from "./autenticacion/LoginMenu";
 import { DepositoMenu } from "./comandos/DepositoMenu";
 import { RetiroMenu } from "./comandos/RetiroMenu";

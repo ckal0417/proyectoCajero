@@ -18,7 +18,7 @@ export class ConsultarSaldoCommand implements ICommand {
         Consola.titulo("CONSULTAR SALDO");
 
         const resultado = this.saldoService.ejecutar(
-            cuenta.obtenerNumeroCuenta()
+            cuenta.obtenerNumeroCuenta().toString()
         );
 
         if (!resultado.estado) {

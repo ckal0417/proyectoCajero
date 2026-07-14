@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { DomainError } from '../../Shared/Errors';
+import { DomainError } from "../../shared/Errors";
 
 export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction): void {
     if (err instanceof DomainError) {

@@ -1,13 +1,16 @@
-import { Transaccion } from "../../Domain/Entities/Transaccion";
+import { Transaccion as TransaccionApp } from '../../Application/models/Transaccion';
+import { Transaccion as TransaccionDomain } from '../../Domain/Entities/Transaccion';
+
+type TransaccionCompat = TransaccionApp | TransaccionDomain;
 
 export class TransaccionRepository {
-    private transacciones: Transaccion[] = [];
+    private readonly transacciones: TransaccionCompat[] = [];
 
-    public guardar(transaccion: Transaccion): void {
+    public guardar(transaccion: TransaccionCompat): void {
         this.transacciones.push(transaccion);
     }
 
-    public obtenerTodas(): Transaccion[] {
+    public obtenerTodas(): TransaccionCompat[] {
         return [...this.transacciones];
     }
 }
