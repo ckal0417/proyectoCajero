@@ -1,35 +1,18 @@
 import type { Request, Response, NextFunction } from 'express';
-import { Dinero } from '../../../Domain/Value-Objects/Dinero';
-import { CuentaRepositoryPostgres } from '../../../Infrastructure/Database/Repositories/CuentaRepositoryPostgres';
+import { AuthRequest } from '../middleware/AuthMiddleware';
+import { operacionesBancariasService } from '../../../Application/services/OperacionesBancariasService';
 
 export class DepositoController {
-    constructor(private readonly cuentaRepo = new CuentaRepositoryPostgres()) {}
-
     async depositar(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = Number(req.params.id);
-            const monto = Number(req.body?.monto);
-            if (!Number.isInteger(id) || !Number.isFinite(monto) || monto <= 0) {
-                res.status(400).json({ ok: false, error: 'INVALID_REQUEST', message: 'Parámetros inválidos' });
-                return;
-            }
-
-            const cuenta = await this.cuentaRepo.buscarPorId(id);
-            if (!cuenta) {
-                res.status(404).json({ ok: false, error: 'CUENTA_NO_ENCONTRADA', message: 'Cuenta no encontrada' });
-                return;
-            }
-
-            const { saldoAnterior, saldoNuevo } = cuenta.depositar(Dinero.desde(monto));
-            await this.cuentaRepo.actualizar(cuenta);
-
-            res.status(200).json({
-                ok: true,
-                data: {
-                    saldoAnterior: saldoAnterior.toString(),
-                    saldoNuevo: saldoNuevo.toString(),
-                },
+            const authReq = req as AuthRequest;
+            const resultado = await operacionesBancariasService.depositar({
+                numeroTarjeta: authReq.numeroTarjeta,
+                idempotencyKey: operacionesBancariasService.obtenerIdempotencyKey(authReq.headers['idempotency-key']),
+                monto: authReq.body?.monto,
             });
+
+            res.status(resultado.status).json(resultado.body);
         } catch (error) {
             next(error);
         }
