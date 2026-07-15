@@ -130,9 +130,7 @@ export class OperacionesBancariasService {
                 return { status: 401, body: { error: 'No autorizado' } };
             }
 
-            if (!args.idempotencyKey) {
-                return { status: 400, body: { error: 'Header idempotency-key es requerido' } };
-            }
+            const idempotencyKey = args.idempotencyKey;
 
             const montoNumero = Number(args.monto);
             if (!Number.isFinite(montoNumero) || montoNumero <= 0) {
@@ -141,28 +139,30 @@ export class OperacionesBancariasService {
 
             await client.query('BEGIN');
 
-            const requestHash = this.crearHashOperacion({
-                numeroTarjeta: args.numeroTarjeta,
-                monto: montoNumero,
-                endpoint: 'DEPOSITO',
-            });
+            if (idempotencyKey) {
+                const requestHash = this.crearHashOperacion({
+                    numeroTarjeta: args.numeroTarjeta,
+                    monto: montoNumero,
+                    endpoint: 'DEPOSITO',
+                });
 
-            const estadoIdempotencia = await this.iniciarIdempotencia(
-                client,
-                args.numeroTarjeta,
-                'DEPOSITO',
-                args.idempotencyKey,
-                requestHash,
-            );
+                const estadoIdempotencia = await this.iniciarIdempotencia(
+                    client,
+                    args.numeroTarjeta,
+                    'DEPOSITO',
+                    idempotencyKey,
+                    requestHash,
+                );
 
-            if (estadoIdempotencia.tipo === 'REPLAY') {
-                await client.query('COMMIT');
-                return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
-            }
+                if (estadoIdempotencia.tipo === 'REPLAY') {
+                    await client.query('COMMIT');
+                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                }
 
-            if (estadoIdempotencia.tipo === 'CONFLICTO') {
-                await client.query('ROLLBACK');
-                return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                if (estadoIdempotencia.tipo === 'CONFLICTO') {
+                    await client.query('ROLLBACK');
+                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                }
             }
 
             const idCuenta = await this.obtenerIdCuentaPorTarjetaTx(client, args.numeroTarjeta);
@@ -221,14 +221,16 @@ export class OperacionesBancariasService {
                 nuevoSaldo: saldoNuevo,
             };
 
-            await this.completarIdempotencia(
-                client,
-                args.numeroTarjeta,
-                'DEPOSITO',
-                args.idempotencyKey,
-                200,
-                respuesta,
-            );
+            if (idempotencyKey) {
+                await this.completarIdempotencia(
+                    client,
+                    args.numeroTarjeta,
+                    'DEPOSITO',
+                    idempotencyKey,
+                    200,
+                    respuesta,
+                );
+            }
 
             await client.query('COMMIT');
 
@@ -258,9 +260,7 @@ export class OperacionesBancariasService {
                 return { status: 401, body: { error: 'No autorizado' } };
             }
 
-            if (!args.idempotencyKey) {
-                return { status: 400, body: { error: 'Header idempotency-key es requerido' } };
-            }
+            const idempotencyKey = args.idempotencyKey;
 
             const montoNumero = Number(args.monto);
             if (!Number.isFinite(montoNumero) || montoNumero <= 0) {
@@ -269,28 +269,30 @@ export class OperacionesBancariasService {
 
             await client.query('BEGIN');
 
-            const requestHash = this.crearHashOperacion({
-                numeroTarjeta: args.numeroTarjeta,
-                monto: montoNumero,
-                endpoint: 'RETIRO',
-            });
+            if (idempotencyKey) {
+                const requestHash = this.crearHashOperacion({
+                    numeroTarjeta: args.numeroTarjeta,
+                    monto: montoNumero,
+                    endpoint: 'RETIRO',
+                });
 
-            const estadoIdempotencia = await this.iniciarIdempotencia(
-                client,
-                args.numeroTarjeta,
-                'RETIRO',
-                args.idempotencyKey,
-                requestHash,
-            );
+                const estadoIdempotencia = await this.iniciarIdempotencia(
+                    client,
+                    args.numeroTarjeta,
+                    'RETIRO',
+                    idempotencyKey,
+                    requestHash,
+                );
 
-            if (estadoIdempotencia.tipo === 'REPLAY') {
-                await client.query('COMMIT');
-                return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
-            }
+                if (estadoIdempotencia.tipo === 'REPLAY') {
+                    await client.query('COMMIT');
+                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                }
 
-            if (estadoIdempotencia.tipo === 'CONFLICTO') {
-                await client.query('ROLLBACK');
-                return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                if (estadoIdempotencia.tipo === 'CONFLICTO') {
+                    await client.query('ROLLBACK');
+                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                }
             }
 
             const idCuenta = await this.obtenerIdCuentaPorTarjetaTx(client, args.numeroTarjeta);
@@ -354,14 +356,16 @@ export class OperacionesBancariasService {
                 nuevoSaldo: saldoNuevo,
             };
 
-            await this.completarIdempotencia(
-                client,
-                args.numeroTarjeta,
-                'RETIRO',
-                args.idempotencyKey,
-                200,
-                respuesta,
-            );
+            if (idempotencyKey) {
+                await this.completarIdempotencia(
+                    client,
+                    args.numeroTarjeta,
+                    'RETIRO',
+                    idempotencyKey,
+                    200,
+                    respuesta,
+                );
+            }
 
             await client.query('COMMIT');
 
@@ -392,9 +396,7 @@ export class OperacionesBancariasService {
                 return { status: 401, body: { error: 'No autorizado' } };
             }
 
-            if (!args.idempotencyKey) {
-                return { status: 400, body: { error: 'Header idempotency-key es requerido' } };
-            }
+            const idempotencyKey = args.idempotencyKey;
 
             const numeroCuentaDestino = String(args.numeroCuentaDestino ?? '');
             const montoNumero = Number(args.monto);
@@ -408,29 +410,31 @@ export class OperacionesBancariasService {
 
             await client.query('BEGIN');
 
-            const requestHash = this.crearHashOperacion({
-                numeroTarjeta: args.numeroTarjeta,
-                numeroCuentaDestino,
-                monto: montoNumero,
-                endpoint: 'TRANSFERENCIA',
-            });
+            if (idempotencyKey) {
+                const requestHash = this.crearHashOperacion({
+                    numeroTarjeta: args.numeroTarjeta,
+                    numeroCuentaDestino,
+                    monto: montoNumero,
+                    endpoint: 'TRANSFERENCIA',
+                });
 
-            const estadoIdempotencia = await this.iniciarIdempotencia(
-                client,
-                args.numeroTarjeta,
-                'TRANSFERENCIA',
-                args.idempotencyKey,
-                requestHash,
-            );
+                const estadoIdempotencia = await this.iniciarIdempotencia(
+                    client,
+                    args.numeroTarjeta,
+                    'TRANSFERENCIA',
+                    idempotencyKey,
+                    requestHash,
+                );
 
-            if (estadoIdempotencia.tipo === 'REPLAY') {
-                await client.query('COMMIT');
-                return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
-            }
+                if (estadoIdempotencia.tipo === 'REPLAY') {
+                    await client.query('COMMIT');
+                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                }
 
-            if (estadoIdempotencia.tipo === 'CONFLICTO') {
-                await client.query('ROLLBACK');
-                return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                if (estadoIdempotencia.tipo === 'CONFLICTO') {
+                    await client.query('ROLLBACK');
+                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                }
             }
 
             const idCuentaOrigen = await this.obtenerIdCuentaPorTarjetaTx(client, args.numeroTarjeta);
@@ -495,8 +499,8 @@ export class OperacionesBancariasService {
                 `
                 UPDATE BancoFuego.Cuenta
                 SET saldo = CASE
-                    WHEN id_cuenta = $1 THEN $2
-                    WHEN id_cuenta = $3 THEN $4
+                    WHEN id_cuenta = $1 THEN $2::numeric
+                    WHEN id_cuenta = $3 THEN $4::numeric
                 END
                 WHERE id_cuenta IN ($1, $3)
                 `,
@@ -539,14 +543,16 @@ export class OperacionesBancariasService {
                 nuevoSaldo: saldoNuevoOrigen,
             };
 
-            await this.completarIdempotencia(
-                client,
-                args.numeroTarjeta,
-                'TRANSFERENCIA',
-                args.idempotencyKey,
-                200,
-                respuesta,
-            );
+            if (idempotencyKey) {
+                await this.completarIdempotencia(
+                    client,
+                    args.numeroTarjeta,
+                    'TRANSFERENCIA',
+                    idempotencyKey,
+                    200,
+                    respuesta,
+                );
+            }
 
             await client.query('COMMIT');
 
