@@ -1,14 +1,14 @@
 import * as readline from "readline";
-import { Usuario } from "../../Application/models/Usuario";
-import { BancoService } from "../../Application/services/BancoService";
-import { CajeroService } from "../../Application/services/CajeroService";
-import { SesionFactory } from "../../Application/bootstrap/SesionFactory";
-import { Consola } from "../../shared/utils/Consola";
+import { Usuario } from "../../../Application/models/Usuario";
+import { BancoService } from "../../../Application/services/BancoService";
+import { CajeroService } from "../Services/CajeroService";
+import { SesionFactory } from "../Bootstrap/SesionFactory";
+import { Consola } from "../../../shared/utils/Consola";
 import { LoginMenu } from "./Autenticacion/LoginMenu";
-import { DepositoMenu } from "./comandos/DepositoMenu";
-import { RetiroMenu } from "./comandos/RetiroMenu";
-import { HistorialMenu } from "./comandos/HistorialMenu";
-import { TransferenciaMenu } from "./comandos/Transferencia/TransferenciaMenu";
+import { DepositoMenu } from "./Operaciones/DepositoMenu";
+import { RetiroMenu } from "./Operaciones/RetiroMenu";
+import { HistorialMenu } from "./Operaciones/HistorialMenu";
+import { TransferenciaMenu } from "./Operaciones/Transferencia/TransferenciaMenu";
 import { CabeceraMenu } from "./Common/CabeceraMenu";
 import { OpcionesMenu } from "./Common/OpcionesMenu";
 

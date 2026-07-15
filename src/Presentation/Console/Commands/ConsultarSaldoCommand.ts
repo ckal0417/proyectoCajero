@@ -1,4 +1,4 @@
-﻿import { ICommand } from "../Interfaces/ICommand";
+import { ICommand } from "../Interfaces/ICommand";
 import { Cuenta } from "../../../Domain/Entities/Cuenta";
 import { Consola } from "../../../shared/utils/Consola";
 import { Formato} from "../../../shared/utils/Formato";
@@ -22,12 +22,12 @@ export class ConsultarSaldoCommand implements ICommand {
         );
 
         if (!resultado.estado) {
-            Consola.error(resultado.error);
+            Consola.error(resultado.error!);
             return;
         }
 
         Consola.informacion(
-            `Saldo actual: ${Formato.dinero(resultado.valor)}`
+            `Saldo actual: ${Formato.dinero(resultado.valor!)}`
         );
 
     }

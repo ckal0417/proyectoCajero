@@ -7,8 +7,13 @@ export class MovimientoRepositoryPostgres implements IMovimientoRepository {
     private readonly pool = PostgresConnection.obtenerPool();
 
     async guardar(movimiento: Movimiento): Promise<void> {
+        let tipoDb: string = movimiento.obtenerTipo();
+        if (tipoDb === 'TRANSFERENCIAINTERNA' || tipoDb === 'TRANSFERENCIAINTERBANCARIA') {
+            tipoDb = 'TRANSFERENCIA';
+        }
+
         await this.pool.query(MovimientoQueries.CREAR, [
-            movimiento.obtenerTipo(),
+            tipoDb,
             movimiento.obtenerMonto().toNumber(),
             movimiento.obtenerSaldoAnterior().toNumber(),
             movimiento.obtenerSaldoNuevo().toNumber(),

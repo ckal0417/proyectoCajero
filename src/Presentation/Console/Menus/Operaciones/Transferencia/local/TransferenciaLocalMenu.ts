@@ -1,7 +1,7 @@
 import * as readline from "readline";
-import { Cuenta } from "../../../../../Domain/Entities/Cuenta";
-import { CajeroService } from "../../../../../Application/services/CajeroService";
-import { Consola } from "../../../../../shared/utils/Consola";
+import { Cuenta } from "../../../../../../Domain/Entities/Cuenta";
+import { CajeroService } from "../../../../Services/CajeroService";
+import { Consola } from "../../../../../../shared/utils/Consola";
 
 export class TransferenciaLocalMenu {
 

@@ -28,7 +28,7 @@ if (process.env.NODE_ENV !== 'production') {
         new winston.transports.Console({
             format: winston.format.combine(
                 winston.format.colorize(),
-                winston.format.printf(({ level, message, timestamp }) => {
+                winston.format.printf(({ level, message, timestamp }: any) => {
                     return `${timestamp} [${level}]: ${message}`;
                 })
             ),

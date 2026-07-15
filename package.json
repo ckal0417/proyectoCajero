@@ -7,6 +7,7 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "migrate": "ts-node src/Infrastructure/Database/migrate.ts",
+    "cli": "esbuild src/index-cli.tsx --bundle --platform=node --format=esm --packages=external --outfile=dist/cli.mjs && node dist/cli.mjs",
     "reset-db": "node reset-db.js && echo '✅ BD limpia'"
   },
   "repository": {
@@ -25,9 +26,11 @@
     "@types/express": "^5.0.6",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.20.0",
+    "@types/react": "^19.2.17",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "ts-node": "^10.9.2",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3"
   },
   "dependencies": {
@@ -39,8 +42,10 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "helmet": "^8.3.0",
+    "ink": "^6.8.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
+    "react": "^19.2.7",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
     "winston": "^3.19.0"

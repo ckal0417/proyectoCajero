@@ -1,4 +1,4 @@
-import { Usuario } from "../models/Usuario";
+import { Usuario } from "../../../Application/models/Usuario";
 import { BancoService } from "../../../Application/services/BancoService";
 import { CajeroService } from "../Services/CajeroService";
 import { EventBus } from "../../../shared/events/EventBus";

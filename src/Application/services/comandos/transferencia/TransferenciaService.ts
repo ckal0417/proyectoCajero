@@ -30,7 +30,7 @@ export class TransferenciaService {
 
         if (!validacion.estado) {
             return ResultadoOperacion.fallido(
-                validacion.error
+                validacion.error!
             );
         }
 
@@ -113,7 +113,7 @@ export class TransferenciaService {
 
         if (!validacion.estado) {
             return ResultadoOperacion.fallido(
-                validacion.error
+                validacion.error!
             );
         }
 

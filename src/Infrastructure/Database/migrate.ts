@@ -30,7 +30,7 @@ export async function runMigrations() {
         }
 
         console.log('📋 Creando esquema y tablas...');
-        const sql = readFileSync(path.resolve(__dirname, '../../../Base De Datos/Banco-Cajero-Practica.sql'), 'utf8');
+        const sql = readFileSync(path.resolve(__dirname, '../../../Base de datos/Banco-Cajero-Practica.sql'), 'utf8');
         
         // Ejecutar el SQL completo en una transacción
         await client.query('BEGIN');
@@ -55,4 +55,16 @@ export async function runMigrations() {
     } finally {
         await client.end();
     }
+}
+
+if (require.main === module || (process.argv[1] && (process.argv[1].endsWith('migrate.ts') || process.argv[1].endsWith('migrate')))) {
+    runMigrations()
+        .then(() => {
+            console.log('✅ Proceso de migración finalizado.');
+            process.exit(0);
+        })
+        .catch((err) => {
+            console.error('❌ Error ejecutando migración:', err);
+            process.exit(1);
+        });
 }

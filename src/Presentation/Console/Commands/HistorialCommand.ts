@@ -15,16 +15,16 @@ export class HistorialCommand implements ICommand {
         const resultado = this.historialService.ejecutar();
 
         if (!resultado.estado) {
-            Consola.error(resultado.error);
+            Consola.error(resultado.error!);
             return;
         }
 
-        if (resultado.valor.length === 0) {
+        if (resultado.valor!.length === 0) {
             Consola.informacion("No existen movimientos.");
             return;
         }
 
-        resultado.valor.forEach(transaccion => {
+        resultado.valor!.forEach(transaccion => {
             Consola.informacion(
                 transaccion.mostrar()
             );

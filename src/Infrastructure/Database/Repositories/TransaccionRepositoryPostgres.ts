@@ -19,10 +19,15 @@ export class TransaccionRepositoryPostgres implements ITransaccionRepository {
     private readonly pool = PostgresConnection.obtenerPool();
 
     async guardar(transaccion: Transaccion): Promise<Transaccion> {
+        let tipoDb: string = transaccion.obtenerTipo();
+        if (tipoDb === 'TRANSFERENCIAINTERNA' || tipoDb === 'TRANSFERENCIAINTERBANCARIA') {
+            tipoDb = 'TRANSFERENCIA';
+        }
+
         const resultado = await this.pool.query<FilaTransaccion>(
             TransaccionQueries.CREAR,
             [
-                transaccion.obtenerTipo(),
+                tipoDb,
                 transaccion.obtenerMonto().toNumber(),
                 transaccion.obtenerEstado(),
                 transaccion.obtenerDescripcion(),

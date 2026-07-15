@@ -1,4 +1,4 @@
-﻿import { ICommand } from "../Interfaces/ICommand";
+import { ICommand } from "../Interfaces/ICommand";
 import { Cuenta } from "../../../Domain/Entities/Cuenta";
 import { Consola } from "../../../shared/utils/Consola";
 import { Formato } from "../../../shared/utils/Formato";
@@ -20,17 +20,17 @@ export class RetirarCommand implements ICommand {
         const validacion = MontoValidacion.validar(monto);
 
         if (!validacion.estado) {
-            Consola.error(validacion.error);
+            Consola.error(validacion.error!);
             return;
         }
 
         const resultado = this.retiroService.ejecutar(
             cuenta.obtenerNumeroCuenta().toString(),
-            validacion.valor
+            validacion.valor!
         );
 
         if (!resultado.estado) {
-            Consola.error(resultado.error);
+            Consola.error(resultado.error!);
             return;
         }
 

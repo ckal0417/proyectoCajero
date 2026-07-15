@@ -1,3 +1,5 @@
+// Unused controller. Commented out because RetirarDineroService is missing.
+/*
 import type { Request, Response, NextFunction } from 'express';
 import { RetirarDineroService } from '../../../Application/services/operaciones/retiro/RetirarDineroService';
 import { TarjetaRepositoryPostgres } from '../../../Infrastructure/Database/Repositories/TarjetaRepositoryPostgres';
@@ -55,3 +57,4 @@ export class RetiroController {
         }
     }
 }
+*/
