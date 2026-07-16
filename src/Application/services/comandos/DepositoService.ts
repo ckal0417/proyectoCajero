@@ -4,7 +4,9 @@ import { TiposEvento } from "../../../shared/events/TiposEvento";
 import { TipoTransaccion } from "../../../Domain/enums/TipoTransaccion";
 import { Resultado, ResultadoOperacion } from "../../models/Resultado";
 import { CuentaRepository } from "../../../Infrastructure/Database/Repositories/CuentaRepository";
-import { Transaccion } from "../../models/Transaccion";
+import { Transaccion } from "../../../Domain/Entities/Transaccion";
+import { Dinero } from "../../../Domain/Value-Objects/Dinero";
+import { EstadoTransaccion } from "../../../Domain/enums/EstadoTransaccion";
 
 export class DepositoService {
     constructor(
@@ -29,12 +31,12 @@ export class DepositoService {
             cuenta.obtenerSaldo()
         );
 
-        const transaccion = new Transaccion(
-            TipoTransaccion.DEPOSITO,
-            monto,
-            new Date(),
-            "Depósito realizado"
-        );
+        const transaccion = Transaccion.crear({
+            tipo: TipoTransaccion.DEPOSITO,
+            monto: Dinero.desde(monto),
+            estado: EstadoTransaccion.EXITOSA,
+            descripcion: "Depósito realizado",
+        });
 
         this.eventBus.publicar({
             nombre: TiposEvento.DEPOSITO_REALIZADO,

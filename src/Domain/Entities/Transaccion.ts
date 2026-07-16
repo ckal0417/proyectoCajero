@@ -1,7 +1,7 @@
 // Entities/Transaccion.ts
-import { TipoTransaccion, EstadoTransaccion } from "../enums/TiposDominio";
+import { TipoTransaccion } from "../enums/TipoTransaccion";
+import { EstadoTransaccion } from "../enums/EstadoTransaccion";
 import { Dinero } from "../Value-Objects/Dinero";
-import { OperacionNoSoportadaError } from "../../shared/Errors";
 
 export class Transaccion {
 
@@ -22,10 +22,6 @@ export class Transaccion {
         descripcion?: string;
         idCajero?: number;
     }): Transaccion {
-
-        if (datos.tipo === 'TRANSFERENCIAINTERBANCARIA') {
-            throw new OperacionNoSoportadaError('Las transferencias interbancarias aún no están soportadas');
-        }
         return new Transaccion(
             undefined,
             datos.tipo,
@@ -58,11 +54,11 @@ export class Transaccion {
     }
 
     esExitosa(): boolean {
-        return this.estado === 'EXITOSA';
+        return this.estado === EstadoTransaccion.EXITOSA;
     }
 
     esFallida(): boolean {
-        return this.estado === 'FALLIDA';
+        return this.estado === EstadoTransaccion.FALLIDA;
     }
 
     obtenerId(): number | undefined {
