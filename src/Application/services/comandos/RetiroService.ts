@@ -1,9 +1,10 @@
-import { Resultado, ResultadoOperacion } from "../../models/Resultado";
-import { CuentaRepository } from "../../../Infrastructure/repositories/CuentaRepository";
+
 import { EventBus } from "../../../shared/events/EventBus";
 import { TiposEvento } from "../../../shared/events/TiposEvento";
 import { Transaccion } from "../../models/Transaccion";
 import { TipoTransaccion } from "../../../Domain/enums/TipoTransaccion";
+import { CuentaRepository } from "../../../Infrastructure/Database/Repositories/CuentaRepository";
+import { Resultado, ResultadoOperacion } from "../../models/Resultado";
 
 export class RetiroService {
     constructor(

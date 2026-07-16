@@ -1,14 +1,12 @@
 import * as readline from "readline";
-import { Cuenta } from "../../../../Application/models/Cuenta";
-import { CajeroService } from "../../../../Application/services/CajeroService";
-import { Consola } from "../../../../shared/utils/Consola";
-import { TipoTransferencia } from "../../../../Domain/enums/TipoTransferencia";
+import { operacionesBancariasService } from "../../../../../Application/services/OperacionesBancariasService";
+import { Consola } from "../../../../../shared/utils/Consola";
+import { Formato } from "../../../../../shared/utils/Formato";
 
 export class TransferenciaMenu {
 
     constructor(
-        private cuentaOrigen: Cuenta,
-        private cajeroService: CajeroService,
+        private numeroTarjeta: string,
         private consola: readline.Interface
     ) {}
 
@@ -25,18 +23,24 @@ export class TransferenciaMenu {
 
                 this.consola.question(
                     "Ingrese el monto: ",
-                    (textoMonto: string) => {
+                    async (textoMonto: string) => {
 
                         const montoTransferencia =
                             Number(textoMonto);
 
-                        this.cajeroService.ejecutar(
-                            "transferir",
-                            this.cuentaOrigen,
-                            TipoTransferencia.LOCAL,
+                        const resultado = await operacionesBancariasService.transferir({
+                            numeroTarjeta: this.numeroTarjeta,
                             numeroCuentaDestino,
-                            montoTransferencia
-                        );
+                            monto: montoTransferencia
+                        });
+
+                        if (resultado.status === 200) {
+                            const body = resultado.body as { mensaje: string; nuevoSaldo: number };
+                            Consola.exito(body.mensaje);
+                            Consola.informacion(`Saldo actual: ${Formato.dinero(body.nuevoSaldo)}`);
+                        } else {
+                            Consola.error((resultado.body as { error: string }).error);
+                        }
 
                         this.consola.question(
                             "\nPresione ENTER para continuar...",

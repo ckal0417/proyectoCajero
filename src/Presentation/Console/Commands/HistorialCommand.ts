@@ -24,7 +24,7 @@ export class HistorialCommand implements ICommand {
             return;
         }
 
-        resultado.valor.forEach(transaccion => {
+        resultado.valor.forEach((transaccion: { mostrar: () => string; }) => {
             Consola.informacion(
                 transaccion.mostrar()
             );

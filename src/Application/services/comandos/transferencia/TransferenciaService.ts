@@ -1,12 +1,13 @@
-import { Resultado, ResultadoOperacion } from "../../../models/Resultado";
-import { CuentaRepository } from "../../../../Infrastructure/repositories/CuentaRepository";
+
 import { TransferenciaLocalService } from "./local/TransferenciaLocalService";
 import { TransferenciaInterbancariaService } from "./interbancaria/TransferenciaInterbancariaService";
 import { EventBus } from "../../../../shared/events/EventBus";
 import { TiposEvento } from "../../../../shared/events/TiposEvento";
-import { Transaccion } from "../../../models/Transaccion";
 import { TipoTransaccion } from "../../../../Domain/enums/TipoTransaccion";
 import { TransferenciaValidacion } from "../../../../shared/utils/validaciones/TransferenciaValidacion";
+import { CuentaRepository } from "../../../../Infrastructure/Database/Repositories/CuentaRepository";
+import { Transaccion } from "../../../models/Transaccion";
+import { Resultado, ResultadoOperacion } from "../../../models/Resultado";
 
 export class TransferenciaService {
 

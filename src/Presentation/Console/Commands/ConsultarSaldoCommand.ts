@@ -1,5 +1,5 @@
 ﻿import { ICommand } from "../Interfaces/ICommand";
-import { Cuenta } from "../../../Domain/Entities/Cuenta";
+import { Cuenta } from "../../../Application/models/Cuenta";
 import { Consola } from "../../../shared/utils/Consola";
 import { Formato} from "../../../shared/utils/Formato";
 import { SaldoService } from "../../../Application/services/comandos/SaldoService";

@@ -1,7 +1,8 @@
 import * as readline from "readline";
-import { Cuenta } from "../../../../../Domain/Entities/Cuenta";
-import { CajeroService } from "../../../../../Application/services/CajeroService";
-import { Consola } from "../../../../../shared/utils/Consola";
+import { Cuenta } from "../../../../../../Application/models/Cuenta";
+import { CajeroService } from "../../../../Services/CajeroService";
+import { Consola } from "../../../../../../shared/utils/Consola";
+import { TipoTransferencia } from "../../../../../../Domain/enums/TipoTransferencia";
 
 export class TransferenciaLocalMenu {
 
@@ -36,7 +37,7 @@ export class TransferenciaLocalMenu {
 
                             this.cuenta,
 
-                            "LOCAL",
+                            TipoTransferencia.LOCAL,
 
                             cuentaDestino,
 

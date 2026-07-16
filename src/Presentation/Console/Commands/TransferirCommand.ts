@@ -1,5 +1,5 @@
 ﻿import { ICommand } from "../Interfaces/ICommand";
-import { Cuenta } from "../../../Domain/Entities/Cuenta";
+import { Cuenta } from "../../../Application/models/Cuenta";
 import { Consola } from "../../../shared/utils/Consola";
 import { TransferenciaService } from "../../../Application/services/comandos/transferencia/TransferenciaService";
 import { TipoTransferencia } from "../../../Domain/enums/TipoTransferencia";
@@ -68,7 +68,7 @@ export class TransferirCommand implements ICommand {
         }
 
         Consola.error(
-            "El tipo de transferencia no es vÃ¡lido."
+            "El tipo de transferencia no es válido."
         );
     }
 

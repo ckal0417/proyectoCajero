@@ -121,7 +121,7 @@ export class OperacionesBancariasService {
 
     async depositar(args: {
         numeroTarjeta: string | undefined;
-        idempotencyKey: string | null;
+        idempotencyKey?: string | null;
         monto: unknown;
     }): Promise<ServiceResponse> {
         const client = await this.pool.connect();
@@ -130,7 +130,7 @@ export class OperacionesBancariasService {
                 return { status: 401, body: { error: 'No autorizado' } };
             }
 
-            const idempotencyKey = args.idempotencyKey;
+            const idempotencyKey = args.idempotencyKey ?? null;
 
             const montoNumero = Number(args.monto);
             if (!Number.isFinite(montoNumero) || montoNumero <= 0) {
@@ -251,7 +251,7 @@ export class OperacionesBancariasService {
 
     async retirar(args: {
         numeroTarjeta: string | undefined;
-        idempotencyKey: string | null;
+        idempotencyKey?: string | null;
         monto: unknown;
     }): Promise<ServiceResponse> {
         const client = await this.pool.connect();
@@ -260,7 +260,7 @@ export class OperacionesBancariasService {
                 return { status: 401, body: { error: 'No autorizado' } };
             }
 
-            const idempotencyKey = args.idempotencyKey;
+            const idempotencyKey = args.idempotencyKey ?? null;
 
             const montoNumero = Number(args.monto);
             if (!Number.isFinite(montoNumero) || montoNumero <= 0) {
@@ -386,7 +386,7 @@ export class OperacionesBancariasService {
 
     async transferir(args: {
         numeroTarjeta: string | undefined;
-        idempotencyKey: string | null;
+        idempotencyKey?: string | null;
         numeroCuentaDestino: unknown;
         monto: unknown;
     }): Promise<ServiceResponse> {
@@ -396,7 +396,7 @@ export class OperacionesBancariasService {
                 return { status: 401, body: { error: 'No autorizado' } };
             }
 
-            const idempotencyKey = args.idempotencyKey;
+            const idempotencyKey = args.idempotencyKey ?? null;
 
             const numeroCuentaDestino = String(args.numeroCuentaDestino ?? '');
             const montoNumero = Number(args.monto);

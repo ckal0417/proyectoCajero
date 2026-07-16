@@ -1,29 +1,48 @@
 import * as readline from "readline";
-import { CajeroService } from "../../../Application/services/CajeroService";
-import { Cuenta } from "../../../Application/models/Cuenta";
-import { Consola } from "../../../shared/utils/Consola";
+import { operacionesBancariasService } from "../../../../Application/services/OperacionesBancariasService";
+import { Consola } from "../../../../shared/utils/Consola";
+import { Formato } from "../../../../shared/utils/Formato";
+
+interface MovimientoHistorial {
+    tipo: string;
+    monto: number;
+    fecha: Date;
+}
 
 export class HistorialMenu {
 
     constructor(
-        private cuenta: Cuenta,
-        private cajeroService: CajeroService,
+        private numeroTarjeta: string,
         private consola: readline.Interface
     ) {}
 
-    public iniciar(callback: () => void): void {
+    public async iniciar(callback: () => void): Promise<void> {
 
         Consola.limpiar();
 
         Consola.titulo("HISTORIAL");
 
-        this.cajeroService.ejecutar(
-
-            "historial",
-
-            this.cuenta
-
+        const resultado = await operacionesBancariasService.obtenerHistorial(
+            this.numeroTarjeta
         );
+
+        if (resultado.status === 200) {
+
+            const body = resultado.body as { historial: MovimientoHistorial[]; mensaje?: string };
+
+            if (body.historial.length === 0) {
+                Consola.informacion(body.mensaje ?? "No existen movimientos.");
+            } else {
+                body.historial.forEach((movimiento) => {
+                    Consola.informacion(
+                        `[${Formato.fecha(new Date(movimiento.fecha))}] ${movimiento.tipo} - ${Formato.dinero(movimiento.monto)}`
+                    );
+                });
+            }
+
+        } else {
+            Consola.error((resultado.body as { error: string }).error);
+        }
 
         this.consola.question(
 

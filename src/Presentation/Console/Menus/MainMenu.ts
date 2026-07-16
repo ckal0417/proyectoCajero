@@ -1,74 +1,44 @@
+// Presentation/Console/Menus/MainMenu.ts
 import * as readline from "readline";
-import { Usuario } from "../../Application/models/Usuario";
-import { BancoService } from "../../Application/services/BancoService";
-import { CajeroService } from "../../Application/services/CajeroService";
-import { SesionFactory } from "../../Application/bootstrap/SesionFactory";
-import { Consola } from "../../shared/utils/Consola";
-import { LoginMenu } from "./Autenticacion/LoginMenu";
-import { DepositoMenu } from "./comandos/DepositoMenu";
-import { RetiroMenu } from "./comandos/RetiroMenu";
-import { HistorialMenu } from "./comandos/HistorialMenu";
-import { TransferenciaMenu } from "./comandos/Transferencia/TransferenciaMenu";
+import { operacionesBancariasService } from "../../../Application/services/OperacionesBancariasService";
+import { Consola } from "../../../shared/utils/Consola";
+import { LoginMenu, SesionAutenticada } from "./Autenticacion/LoginMenu";
+import { DepositoMenu } from "./Operaciones/DepositoMenu";
+import { RetiroMenu } from "./Operaciones/RetiroMenu";
+import { HistorialMenu } from "./Operaciones/HistorialMenu";
+import { TransferenciaMenu } from "./Operaciones/Transferencia/TransferenciaMenu";
 import { CabeceraMenu } from "./Common/CabeceraMenu";
 import { OpcionesMenu } from "./Common/OpcionesMenu";
 
 export class MainMenu {
 
-    private usuario: Usuario | null = null;
+    private sesion: SesionAutenticada | null = null;
 
-    private cajeroService: CajeroService | null = null;
-// Recibe dos cosas inyectadas de dependencias ,Main menu no crea
-// sus propias dependencias, las recibe ya armadas.
     constructor(
-        private bancoService: BancoService,
         private consola: readline.Interface
     ) {}
-// Crea el loginMenu y le pasa un callback
-//Cuando el loginMenu  sea exitoso, ese callback guarda el usuario autenticado y llama a prepararSesion
+
     public iniciar(): void {
 
         const loginMenu = new LoginMenu(
-            this.bancoService,
             this.consola
         );
 
         loginMenu.iniciar(
-            (usuarioAutenticado: Usuario) => {
+            (sesionAutenticada: SesionAutenticada) => {
 
-                this.usuario = usuarioAutenticado;
+                this.sesion = sesionAutenticada;
 
-                this.prepararSesion();
+                this.mostrarMenu();
 
             }
         );
 
     }
-// Aqui usa sesionFactory.crear para construir el cajeroService de ese usuario.
-    private prepararSesion(): void {
 
-        if (!this.usuario) {
-
-            Consola.error(
-                "No fue posible preparar la sesión."
-            );
-
-            return;
-
-        }
-
-        this.cajeroService = SesionFactory.crear(
-            this.usuario,
-            this.bancoService
-        );
-
-        this.mostrarMenu();
-
-    }
-// Limpia consola ,muestra la cabecera y crea un opcionesMenu que le pide al 
-//usuario que elija una opcion "1,2,3"  y llama a ejecutarOpcion con la opcion elegida.
     private mostrarMenu(): void {
 
-        if (!this.usuario || !this.cajeroService) {
+        if (!this.sesion) {
 
             return;
 
@@ -77,7 +47,7 @@ export class MainMenu {
         Consola.limpiar();
 
         CabeceraMenu.mostrar(
-            this.usuario
+            this.sesion
         );
 
         const opcionesMenu = new OpcionesMenu(
@@ -96,18 +66,17 @@ export class MainMenu {
 
     }
 
-    private ejecutarOpcion(
+    private async ejecutarOpcion(
         opcionSeleccionada: string
-    ): void {
+    ): Promise<void> {
 
-        if (!this.usuario || !this.cajeroService) {
+        if (!this.sesion) {
 
             return;
 
         }
 
-        const cuentaUsuario =
-            this.usuario.obtenerCuenta();
+        const numeroTarjeta = this.sesion.numeroTarjeta;
 
         switch (opcionSeleccionada) {
 
@@ -115,10 +84,16 @@ export class MainMenu {
 
                 Consola.limpiar();
 
-                this.cajeroService.ejecutar(
-                    "saldo",
-                    cuentaUsuario
+                const resultado = await operacionesBancariasService.obtenerSaldo(
+                    numeroTarjeta
                 );
+
+                if (resultado.status === 200) {
+                    const body = resultado.body as { saldo: number };
+                    Consola.informacion(`Saldo actual: $${body.saldo}`);
+                } else {
+                    Consola.error((resultado.body as { error: string }).error);
+                }
 
                 this.continuar();
 
@@ -127,8 +102,7 @@ export class MainMenu {
             case "2":
 
                 new DepositoMenu(
-                    cuentaUsuario,
-                    this.cajeroService,
+                    numeroTarjeta,
                     this.consola
                 ).iniciar(
                     () => this.mostrarMenu()
@@ -139,8 +113,7 @@ export class MainMenu {
             case "3":
 
                 new RetiroMenu(
-                    cuentaUsuario,
-                    this.cajeroService,
+                    numeroTarjeta,
                     this.consola
                 ).iniciar(
                     () => this.mostrarMenu()
@@ -151,8 +124,7 @@ export class MainMenu {
             case "4":
 
                 new HistorialMenu(
-                    cuentaUsuario,
-                    this.cajeroService,
+                    numeroTarjeta,
                     this.consola
                 ).iniciar(
                     () => this.mostrarMenu()
@@ -163,8 +135,7 @@ export class MainMenu {
             case "5":
 
                 new TransferenciaMenu(
-                    cuentaUsuario,
-                    this.cajeroService,
+                    numeroTarjeta,
                     this.consola
                 ).iniciar(
                     () => this.mostrarMenu()

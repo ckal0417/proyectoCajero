@@ -6,9 +6,13 @@ export class TransferenciaController {
     async transferir(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const authReq = req as AuthRequest;
+            const idempotencyKey =
+                operacionesBancariasService.obtenerIdempotencyKey(authReq.headers['idempotency-key']) ??
+                operacionesBancariasService.obtenerIdempotencyKey(authReq.body?.idempotencyKey);
+
             const resultado = await operacionesBancariasService.transferir({
                 numeroTarjeta: authReq.numeroTarjeta,
-                idempotencyKey: operacionesBancariasService.obtenerIdempotencyKey(authReq.headers['idempotency-key']),
+                idempotencyKey,
                 numeroCuentaDestino: authReq.body?.numeroCuentaDestino,
                 monto: authReq.body?.monto,
             });

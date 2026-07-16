@@ -1,26 +1,21 @@
-import { Usuario } from "../../../Application/models/Usuario";
-import { Consola } from "../../../shared/utils/Consola";
+import { Usuario } from "../../../../Application/models/Usuario";
+import { Consola } from "../../../../shared/utils/Consola";
+import { SesionAutenticada } from "../Autenticacion/LoginMenu";
 
 export class CabeceraMenu {
 
     public static mostrar(
-        usuario: Usuario
-    ): void {
-
-        const cuenta = usuario.obtenerCuenta();
+        sesion: SesionAutenticada
+        ): void {
 
         Consola.titulo("CAJERO AUTOMÁTICO");
 
         Consola.informacion(
-            `Titular: ${usuario.obtenerNombre()}`
+            `Número de cuenta: ${sesion.numeroCuenta}`
         );
 
         Consola.informacion(
-            `Número de cuenta: ${cuenta.obtenerNumeroCuenta()}`
-        );
-
-        Consola.informacion(
-            `Tipo de cuenta: ${cuenta.obtenerTipoCuenta()}`
+            `Saldo actual: $${sesion.saldo}`
         );
 
         Consola.informacion("");

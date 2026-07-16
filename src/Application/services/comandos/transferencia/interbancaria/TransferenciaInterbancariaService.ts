@@ -1,5 +1,8 @@
 import { Cuenta } from "../../../../models/Cuenta";
 
+
+
+
 interface BancoIntermediarioPort {
     procesarTransferencia(
         bancoOrigen: string,

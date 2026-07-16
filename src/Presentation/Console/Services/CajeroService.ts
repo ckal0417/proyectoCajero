@@ -1,4 +1,4 @@
-import { Cuenta } from "../models/Cuenta";
+import { Cuenta } from "../../../Application/models/Cuenta";
 import { ICommand } from "../Interfaces/ICommand";
 import { Consola } from "../../../shared/utils/Consola";
 export class CajeroService {

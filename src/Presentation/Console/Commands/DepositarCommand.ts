@@ -1,5 +1,5 @@
 ﻿import { ICommand } from "../Interfaces/ICommand";
-import { Cuenta } from "../../../Domain/Entities/Cuenta";
+import { Cuenta } from "../../../Application/models/Cuenta";
 import { Consola } from "../../../shared/utils/Consola";
 import { Formato } from "../../../shared/utils/Formato";
 import { MontoValidacion } from "../../../shared/utils/validaciones/MontoValidacion";
@@ -40,7 +40,7 @@ export class DepositarCommand implements ICommand {
         Consola.informacion("");
 
         Consola.informacion(
-            `Saldo actual: ${Formato.dinero(cuenta.obtenerSaldo().toNumber())}`
+            `Saldo actual: ${Formato.dinero(cuenta.obtenerSaldo())}`
         );
 
     }

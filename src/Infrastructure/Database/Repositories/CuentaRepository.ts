@@ -1,4 +1,5 @@
-import { Cuenta } from '../../Application/models/Cuenta';
+import { Cuenta } from "../../../Application/models/Cuenta";
+
 
 export class CuentaRepository {
     constructor(private readonly cuentas: Cuenta[] = []) {}

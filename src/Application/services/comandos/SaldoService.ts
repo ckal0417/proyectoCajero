@@ -1,5 +1,5 @@
+import { CuentaRepository } from "../../../Infrastructure/Database/Repositories/CuentaRepository";
 import { Resultado, ResultadoOperacion } from "../../models/Resultado";
-import { CuentaRepository } from "../../../Infrastructure/repositories/CuentaRepository";
 
 export class SaldoService {
     constructor(
