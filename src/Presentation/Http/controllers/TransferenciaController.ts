@@ -1,25 +1,29 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 import { operacionesBancariasService } from '../../../Application/services/OperacionesBancariasService';
+import { ResultadoOperacion } from '../../../Application/models/Resultado';
 
 export class TransferenciaController {
     async transferir(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            const authReq = req as AuthRequest;
-            const idempotencyKey =
-                operacionesBancariasService.obtenerIdempotencyKey(authReq.headers['idempotency-key']) ??
-                operacionesBancariasService.obtenerIdempotencyKey(authReq.body?.idempotencyKey);
+        const authReq = req as AuthRequest;
+        const idempotencyKey =
+            operacionesBancariasService.obtenerIdempotencyKey(authReq.headers['idempotency-key']) ??
+            operacionesBancariasService.obtenerIdempotencyKey(authReq.body?.idempotencyKey);
 
-            const resultado = await operacionesBancariasService.transferir({
-                numeroTarjeta: authReq.numeroTarjeta,
-                idempotencyKey,
-                numeroCuentaDestino: authReq.body?.numeroCuentaDestino,
-                monto: authReq.body?.monto,
+        const resultado = await operacionesBancariasService.transferir({
+            numeroTarjeta: authReq.numeroTarjeta,
+            idempotencyKey,
+            numeroCuentaDestino: authReq.body?.numeroCuentaDestino,
+            monto: authReq.body?.monto,
+        });
+
+        if (!resultado.estado) {
+            res.status(ResultadoOperacion.obtenerStatusError(resultado, 400)).json({
+                error: ResultadoOperacion.obtenerMensajeError(resultado),
             });
-
-            res.status(resultado.status).json(resultado.body);
-        } catch (error) {
-            next(error);
+            return;
         }
+
+        res.status(resultado.valor.status).json(resultado.valor.body);
     }
 }

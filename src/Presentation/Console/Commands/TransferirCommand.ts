@@ -3,6 +3,7 @@ import { Cuenta } from "../../../Application/models/Cuenta";
 import { Consola } from "../../../shared/utils/Consola";
 import { TransferenciaService } from "../../../Application/services/comandos/transferencia/TransferenciaService";
 import { TipoTransferencia } from "../../../Domain/enums/TipoTransferencia";
+import { Resultado } from "../../../Application/models/Resultado";
 export class TransferirCommand implements ICommand {
 
     public nombre: string = "transferir";
@@ -73,10 +74,7 @@ export class TransferirCommand implements ICommand {
     }
 
     private mostrarResultado(
-        resultado: {
-            estado: boolean;
-            error?: string;
-        }
+        resultado: Resultado<void>
     ): void {
 
         if (!resultado.estado) {

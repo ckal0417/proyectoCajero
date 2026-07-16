@@ -3,6 +3,7 @@ import { PoolClient } from 'pg';
 import { CuentaRepositoryPostgres } from '../../Infrastructure/Database/Repositories/CuentaRepositoryPostgres';
 import { PostgresConnection } from '../../Infrastructure/Database/PostgresConnection';
 import logger from '../../shared/Logger';
+import { Resultado, ResultadoOperacion } from '../models/Resultado';
 
 interface FilaCuentaTarjeta {
     id_cuenta: number;
@@ -52,42 +53,42 @@ export class OperacionesBancariasService {
 
     private readonly pool = PostgresConnection.obtenerPool();
 
-    async obtenerSaldo(numeroTarjeta: string | undefined): Promise<ServiceResponse> {
+    async obtenerSaldo(numeroTarjeta: string | undefined): Promise<Resultado<ServiceResponse>> {
         try {
             if (!numeroTarjeta) {
-                return { status: 401, body: { error: 'No autorizado' } };
+                return this.fallido('No autorizado', 401);
             }
 
             const idCuenta = await this.obtenerIdCuentaPorTarjeta(numeroTarjeta);
 
             if (idCuenta === null) {
-                return { status: 404, body: { error: 'Cuenta no encontrada' } };
+                return this.fallido('Cuenta no encontrada', 404);
             }
 
             const cuenta = await this.cuentaRepository.buscarPorId(idCuenta);
 
             if (!cuenta) {
-                return { status: 404, body: { error: 'Cuenta no encontrada' } };
+                return this.fallido('Cuenta no encontrada', 404);
             }
 
             logger.info(`Consulta de saldo para tarjeta: ${numeroTarjeta}`);
-            return { status: 200, body: { saldo: cuenta.obtenerSaldo().toNumber() } };
+            return ResultadoOperacion.exitoso({ status: 200, body: { saldo: cuenta.obtenerSaldo().toNumber() } });
         } catch (error) {
             logger.error('Error consultando saldo:', error);
-            return { status: 500, body: { error: 'Error interno del servidor' } };
+            return this.fallido('Error interno del servidor', 500);
         }
     }
 
-    async obtenerHistorial(numeroTarjeta: string | undefined): Promise<ServiceResponse> {
+    async obtenerHistorial(numeroTarjeta: string | undefined): Promise<Resultado<ServiceResponse>> {
         try {
             if (!numeroTarjeta) {
-                return { status: 401, body: { error: 'No autorizado' } };
+                return this.fallido('No autorizado', 401);
             }
 
             const idCuenta = await this.obtenerIdCuentaPorTarjeta(numeroTarjeta);
 
             if (idCuenta === null) {
-                return { status: 404, body: { error: 'Cuenta no encontrada' } };
+                return this.fallido('Cuenta no encontrada', 404);
             }
 
             const resultado = await this.pool.query<FilaHistorial>(
@@ -108,14 +109,14 @@ export class OperacionesBancariasService {
 
             if (historial.length === 0) {
                 logger.info(`Historial vacio para tarjeta: ${numeroTarjeta}`);
-                return { status: 200, body: { historial: [], mensaje: 'No hay transacciones' } };
+                return ResultadoOperacion.exitoso({ status: 200, body: { historial: [], mensaje: 'No hay transacciones' } });
             }
 
             logger.info(`Consulta de historial para tarjeta: ${numeroTarjeta}`);
-            return { status: 200, body: { historial } };
+            return ResultadoOperacion.exitoso({ status: 200, body: { historial } });
         } catch (error) {
             logger.error('Error obteniendo historial:', error);
-            return { status: 500, body: { error: 'Error interno del servidor' } };
+            return this.fallido('Error interno del servidor', 500);
         }
     }
 
@@ -123,18 +124,18 @@ export class OperacionesBancariasService {
         numeroTarjeta: string | undefined;
         idempotencyKey?: string | null;
         monto: unknown;
-    }): Promise<ServiceResponse> {
+    }): Promise<Resultado<ServiceResponse>> {
         const client = await this.pool.connect();
         try {
             if (!args.numeroTarjeta) {
-                return { status: 401, body: { error: 'No autorizado' } };
+                return this.fallido('No autorizado', 401);
             }
 
             const idempotencyKey = args.idempotencyKey ?? null;
 
             const montoNumero = Number(args.monto);
             if (!Number.isFinite(montoNumero) || montoNumero <= 0) {
-                return { status: 400, body: { error: 'Monto debe ser mayor a 0' } };
+                return this.fallido('Monto debe ser mayor a 0', 400);
             }
 
             await client.query('BEGIN');
@@ -156,12 +157,15 @@ export class OperacionesBancariasService {
 
                 if (estadoIdempotencia.tipo === 'REPLAY') {
                     await client.query('COMMIT');
-                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                    return ResultadoOperacion.exitoso({
+                        status: estadoIdempotencia.statusCode,
+                        body: estadoIdempotencia.body,
+                    });
                 }
 
                 if (estadoIdempotencia.tipo === 'CONFLICTO') {
                     await client.query('ROLLBACK');
-                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                    return this.fallido(estadoIdempotencia.body.error, estadoIdempotencia.statusCode);
                 }
             }
 
@@ -169,19 +173,19 @@ export class OperacionesBancariasService {
 
             if (idCuenta === null) {
                 await client.query('ROLLBACK');
-                return { status: 404, body: { error: 'Cuenta no encontrada' } };
+                return this.fallido('Cuenta no encontrada', 404);
             }
 
             const cuenta = await this.obtenerCuentaBloqueada(client, idCuenta);
 
             if (!cuenta) {
                 await client.query('ROLLBACK');
-                return { status: 404, body: { error: 'Cuenta no encontrada' } };
+                return this.fallido('Cuenta no encontrada', 404);
             }
 
             if (!cuenta.activa) {
                 await client.query('ROLLBACK');
-                return { status: 409, body: { error: 'La cuenta no esta activa' } };
+                return this.fallido('La cuenta no esta activa', 409);
             }
 
             const saldoAnterior = Number(cuenta.saldo);
@@ -235,7 +239,7 @@ export class OperacionesBancariasService {
             await client.query('COMMIT');
 
             logger.info(`Deposito exitoso: $${montoNumero} para tarjeta ${args.numeroTarjeta}`);
-            return { status: 200, body: respuesta };
+            return ResultadoOperacion.exitoso({ status: 200, body: respuesta });
         } catch (error) {
             try {
                 await client.query('ROLLBACK');
@@ -243,7 +247,7 @@ export class OperacionesBancariasService {
                 // Ignore rollback errors and keep original error.
             }
             logger.error('Error en deposito:', error);
-            return { status: 500, body: { error: 'Error interno del servidor' } };
+            return this.fallido('Error interno del servidor', 500);
         } finally {
             client.release();
         }
@@ -253,18 +257,18 @@ export class OperacionesBancariasService {
         numeroTarjeta: string | undefined;
         idempotencyKey?: string | null;
         monto: unknown;
-    }): Promise<ServiceResponse> {
+    }): Promise<Resultado<ServiceResponse>> {
         const client = await this.pool.connect();
         try {
             if (!args.numeroTarjeta) {
-                return { status: 401, body: { error: 'No autorizado' } };
+                return this.fallido('No autorizado', 401);
             }
 
             const idempotencyKey = args.idempotencyKey ?? null;
 
             const montoNumero = Number(args.monto);
             if (!Number.isFinite(montoNumero) || montoNumero <= 0) {
-                return { status: 400, body: { error: 'Monto debe ser mayor a 0' } };
+                return this.fallido('Monto debe ser mayor a 0', 400);
             }
 
             await client.query('BEGIN');
@@ -286,12 +290,15 @@ export class OperacionesBancariasService {
 
                 if (estadoIdempotencia.tipo === 'REPLAY') {
                     await client.query('COMMIT');
-                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                    return ResultadoOperacion.exitoso({
+                        status: estadoIdempotencia.statusCode,
+                        body: estadoIdempotencia.body,
+                    });
                 }
 
                 if (estadoIdempotencia.tipo === 'CONFLICTO') {
                     await client.query('ROLLBACK');
-                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                    return this.fallido(estadoIdempotencia.body.error, estadoIdempotencia.statusCode);
                 }
             }
 
@@ -299,25 +306,25 @@ export class OperacionesBancariasService {
 
             if (idCuenta === null) {
                 await client.query('ROLLBACK');
-                return { status: 404, body: { error: 'Cuenta no encontrada' } };
+                return this.fallido('Cuenta no encontrada', 404);
             }
 
             const cuenta = await this.obtenerCuentaBloqueada(client, idCuenta);
 
             if (!cuenta) {
                 await client.query('ROLLBACK');
-                return { status: 404, body: { error: 'Cuenta no encontrada' } };
+                return this.fallido('Cuenta no encontrada', 404);
             }
 
             if (!cuenta.activa) {
                 await client.query('ROLLBACK');
-                return { status: 409, body: { error: 'La cuenta no esta activa' } };
+                return this.fallido('La cuenta no esta activa', 409);
             }
 
             const saldoAnterior = Number(cuenta.saldo);
             if (saldoAnterior < montoNumero) {
                 await client.query('ROLLBACK');
-                return { status: 400, body: { error: 'Fondos insuficientes' } };
+                return this.fallido('Fondos insuficientes', 400);
             }
 
             const saldoNuevo = saldoAnterior - montoNumero;
@@ -370,7 +377,7 @@ export class OperacionesBancariasService {
             await client.query('COMMIT');
 
             logger.info(`Retiro exitoso: $${montoNumero} para tarjeta ${args.numeroTarjeta}`);
-            return { status: 200, body: respuesta };
+            return ResultadoOperacion.exitoso({ status: 200, body: respuesta });
         } catch (error) {
             try {
                 await client.query('ROLLBACK');
@@ -378,7 +385,7 @@ export class OperacionesBancariasService {
                 // Ignore rollback errors and keep original error.
             }
             logger.warn(`Retiro fallido para tarjeta ${args.numeroTarjeta}: ${String(error)}`);
-            return { status: 500, body: { error: 'Error interno del servidor' } };
+            return this.fallido('Error interno del servidor', 500);
         } finally {
             client.release();
         }
@@ -389,11 +396,11 @@ export class OperacionesBancariasService {
         idempotencyKey?: string | null;
         numeroCuentaDestino: unknown;
         monto: unknown;
-    }): Promise<ServiceResponse> {
+    }): Promise<Resultado<ServiceResponse>> {
         const client = await this.pool.connect();
         try {
             if (!args.numeroTarjeta) {
-                return { status: 401, body: { error: 'No autorizado' } };
+                return this.fallido('No autorizado', 401);
             }
 
             const idempotencyKey = args.idempotencyKey ?? null;
@@ -402,10 +409,7 @@ export class OperacionesBancariasService {
             const montoNumero = Number(args.monto);
 
             if (!numeroCuentaDestino || !Number.isFinite(montoNumero) || montoNumero <= 0) {
-                return {
-                    status: 400,
-                    body: { error: 'numeroCuentaDestino y monto (mayor a 0) son requeridos' },
-                };
+                return this.fallido('numeroCuentaDestino y monto (mayor a 0) son requeridos', 400);
             }
 
             await client.query('BEGIN');
@@ -428,30 +432,33 @@ export class OperacionesBancariasService {
 
                 if (estadoIdempotencia.tipo === 'REPLAY') {
                     await client.query('COMMIT');
-                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                    return ResultadoOperacion.exitoso({
+                        status: estadoIdempotencia.statusCode,
+                        body: estadoIdempotencia.body,
+                    });
                 }
 
                 if (estadoIdempotencia.tipo === 'CONFLICTO') {
                     await client.query('ROLLBACK');
-                    return { status: estadoIdempotencia.statusCode, body: estadoIdempotencia.body };
+                    return this.fallido(estadoIdempotencia.body.error, estadoIdempotencia.statusCode);
                 }
             }
 
             const idCuentaOrigen = await this.obtenerIdCuentaPorTarjetaTx(client, args.numeroTarjeta);
             if (idCuentaOrigen === null) {
                 await client.query('ROLLBACK');
-                return { status: 404, body: { error: 'Cuenta origen no encontrada' } };
+                return this.fallido('Cuenta origen no encontrada', 404);
             }
 
             const idCuentaDestino = await this.obtenerIdCuentaPorNumeroTx(client, numeroCuentaDestino);
             if (idCuentaDestino === null) {
                 await client.query('ROLLBACK');
-                return { status: 404, body: { error: 'Cuenta destino no encontrada' } };
+                return this.fallido('Cuenta destino no encontrada', 404);
             }
 
             if (idCuentaOrigen === idCuentaDestino) {
                 await client.query('ROLLBACK');
-                return { status: 400, body: { error: 'La cuenta destino debe ser distinta a la de origen' } };
+                return this.fallido('La cuenta destino debe ser distinta a la de origen', 400);
             }
 
             const idsOrdenados = [idCuentaOrigen, idCuentaDestino].sort((a, b) => a - b);
@@ -468,7 +475,7 @@ export class OperacionesBancariasService {
 
             if (cuentasBloqueadas.rowCount !== 2) {
                 await client.query('ROLLBACK');
-                return { status: 404, body: { error: 'Cuenta no encontrada' } };
+                return this.fallido('Cuenta no encontrada', 404);
             }
 
             const cuentaOrigen = cuentasBloqueadas.rows.find((fila) => fila.id_cuenta === idCuentaOrigen);
@@ -476,12 +483,12 @@ export class OperacionesBancariasService {
 
             if (!cuentaOrigen || !cuentaDestino) {
                 await client.query('ROLLBACK');
-                return { status: 404, body: { error: 'Cuenta no encontrada' } };
+                return this.fallido('Cuenta no encontrada', 404);
             }
 
             if (!cuentaOrigen.activa || !cuentaDestino.activa) {
                 await client.query('ROLLBACK');
-                return { status: 409, body: { error: 'Cuenta no activa' } };
+                return this.fallido('Cuenta no activa', 409);
             }
 
             const saldoAnteriorOrigen = Number(cuentaOrigen.saldo);
@@ -489,7 +496,7 @@ export class OperacionesBancariasService {
 
             if (saldoAnteriorOrigen < montoNumero) {
                 await client.query('ROLLBACK');
-                return { status: 400, body: { error: 'Fondos insuficientes' } };
+                return this.fallido('Fondos insuficientes', 400);
             }
 
             const saldoNuevoOrigen = saldoAnteriorOrigen - montoNumero;
@@ -559,7 +566,7 @@ export class OperacionesBancariasService {
             logger.info(
                 `Transferencia exitosa: $${montoNumero} desde ${args.numeroTarjeta} a ${numeroCuentaDestino}`,
             );
-            return { status: 200, body: respuesta };
+            return ResultadoOperacion.exitoso({ status: 200, body: respuesta });
         } catch (error) {
             try {
                 await client.query('ROLLBACK');
@@ -567,7 +574,7 @@ export class OperacionesBancariasService {
                 // Ignore rollback errors and keep original error.
             }
             logger.warn(`Transferencia fallida: ${String(error)}`);
-            return { status: 500, body: { error: 'Error interno del servidor' } };
+            return this.fallido('Error interno del servidor', 500);
         } finally {
             client.release();
         }
@@ -752,6 +759,10 @@ export class OperacionesBancariasService {
         }
 
         return resultado.rows[0]!;
+    }
+
+    private fallido(mensaje: string, statusCode: number): Resultado<ServiceResponse> {
+        return ResultadoOperacion.fallido({ mensaje, statusCode });
     }
 }
 

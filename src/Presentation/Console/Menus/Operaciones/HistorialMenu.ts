@@ -2,6 +2,7 @@ import * as readline from "readline";
 import { operacionesBancariasService } from "../../../../Application/services/OperacionesBancariasService";
 import { Consola } from "../../../../shared/utils/Consola";
 import { Formato } from "../../../../shared/utils/Formato";
+import { ResultadoOperacion } from "../../../../Application/models/Resultado";
 
 interface MovimientoHistorial {
     tipo: string;
@@ -26,9 +27,9 @@ export class HistorialMenu {
             this.numeroTarjeta
         );
 
-        if (resultado.status === 200) {
+        if (resultado.estado) {
 
-            const body = resultado.body as { historial: MovimientoHistorial[]; mensaje?: string };
+            const body = resultado.valor.body as { historial: MovimientoHistorial[]; mensaje?: string };
 
             if (body.historial.length === 0) {
                 Consola.informacion(body.mensaje ?? "No existen movimientos.");
@@ -41,7 +42,7 @@ export class HistorialMenu {
             }
 
         } else {
-            Consola.error((resultado.body as { error: string }).error);
+            Consola.error(ResultadoOperacion.obtenerMensajeError(resultado));
         }
 
         this.consola.question(

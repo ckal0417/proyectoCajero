@@ -9,6 +9,7 @@ import { HistorialMenu } from "./Operaciones/HistorialMenu";
 import { TransferenciaMenu } from "./Operaciones/Transferencia/TransferenciaMenu";
 import { CabeceraMenu } from "./Common/CabeceraMenu";
 import { OpcionesMenu } from "./Common/OpcionesMenu";
+import { ResultadoOperacion } from "../../../Application/models/Resultado";
 
 export class MainMenu {
 
@@ -88,11 +89,11 @@ export class MainMenu {
                     numeroTarjeta
                 );
 
-                if (resultado.status === 200) {
-                    const body = resultado.body as { saldo: number };
+                if (resultado.estado) {
+                    const body = resultado.valor.body as { saldo: number };
                     Consola.informacion(`Saldo actual: $${body.saldo}`);
                 } else {
-                    Consola.error((resultado.body as { error: string }).error);
+                    Consola.error(ResultadoOperacion.obtenerMensajeError(resultado));
                 }
 
                 this.continuar();

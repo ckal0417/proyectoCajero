@@ -3,6 +3,7 @@ import * as readline from "readline";
 import { NumeroCuenta } from "../../../../Domain/Value-Objects/NumeroCuenta";
 import { Consola } from "../../../../shared/utils/Consola";
 import { autenticacionService } from "../../../../Application/services/AutenticationService";
+import { ResultadoOperacion } from "../../../../Application/models/Resultado";
 
 export interface SesionAutenticada {
     numeroTarjeta: string;
@@ -75,9 +76,9 @@ export class LoginMenu {
             pin
         );
 
-        if (!resultado.exito) {
+        if (!resultado.estado) {
 
-            Consola.error(resultado.error);
+            Consola.error(ResultadoOperacion.obtenerMensajeError(resultado));
 
             this.consola.question(
                 "\nPresione ENTER para reintentar...",
@@ -89,9 +90,9 @@ export class LoginMenu {
         }
 
         onLoginExitoso({
-            numeroTarjeta: resultado.numeroTarjeta,
-            numeroCuenta: resultado.numeroCuenta,
-            saldo: resultado.saldo
+            numeroTarjeta: resultado.valor.numeroTarjeta,
+            numeroCuenta: resultado.valor.numeroCuenta,
+            saldo: resultado.valor.saldo
         });
 
     }

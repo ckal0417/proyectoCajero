@@ -2,6 +2,7 @@ import * as readline from "readline";
 import { operacionesBancariasService } from "../../../../Application/services/OperacionesBancariasService";
 import { Consola } from "../../../../shared/utils/Consola";
 import { Formato } from "../../../../shared/utils/Formato";
+import { ResultadoOperacion } from "../../../../Application/models/Resultado";
 
 export class RetiroMenu {
 
@@ -28,12 +29,12 @@ export class RetiroMenu {
                     monto
                 });
 
-                if (resultado.status === 200) {
-                    const body = resultado.body as { mensaje: string; nuevoSaldo: number };
+                if (resultado.estado) {
+                    const body = resultado.valor.body as { mensaje: string; nuevoSaldo: number };
                     Consola.exito(body.mensaje);
                     Consola.informacion(`Saldo actual: ${Formato.dinero(body.nuevoSaldo)}`);
                 } else {
-                    Consola.error((resultado.body as { error: string }).error);
+                    Consola.error(ResultadoOperacion.obtenerMensajeError(resultado));
                 }
 
                 this.consola.question(
