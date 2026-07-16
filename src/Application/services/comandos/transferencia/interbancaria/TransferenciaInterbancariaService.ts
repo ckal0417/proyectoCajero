@@ -1,10 +1,19 @@
 import { Cuenta } from "../../../../models/Cuenta";
-import { BancoIntermediarioService } from "../../../BancoIntermediarioService";
+
+interface BancoIntermediarioPort {
+    procesarTransferencia(
+        bancoOrigen: string,
+        bancoDestino: string,
+        numeroCuentaOrigen: string,
+        numeroCuentaDestino: string,
+        montoTransferencia: number
+    ): boolean;
+}
 
 export class TransferenciaInterbancariaService {
 
     constructor(
-        private bancoIntermediarioService: BancoIntermediarioService
+        private bancoIntermediarioService: BancoIntermediarioPort
     ) {}
 
     public transferir(

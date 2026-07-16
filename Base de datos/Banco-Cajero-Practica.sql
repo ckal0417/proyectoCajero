@@ -158,6 +158,25 @@ CREATE TABLE BancoFuego.Autenticacion(
 
 );
 
+-- Se crea tabla para control de idempotencia en operaciones criticas
+CREATE TABLE BancoFuego.IdempotenciaOperacion(
+
+    id_idempotencia SERIAL PRIMARY KEY,
+    numero_tarjeta VARCHAR(20) NOT NULL,
+    endpoint VARCHAR(40) NOT NULL,
+    idempotency_key VARCHAR(100) NOT NULL,
+    request_hash VARCHAR(64) NOT NULL,
+    estado VARCHAR(20) NOT NULL DEFAULT 'EN_PROCESO',
+    respuesta_http INTEGER,
+    respuesta_body JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT uq_idempotencia_operacion UNIQUE (numero_tarjeta, endpoint, idempotency_key),
+    CONSTRAINT chk_estado_idempotencia CHECK (estado IN ('EN_PROCESO', 'COMPLETADA'))
+
+);
+
 -- Se crean los indices para optimizar las consultas en las tablas del esquema BancoFuego
 CREATE INDEX idx_cliente_cedula
 ON BancoFuego.Cliente(cedula);
@@ -173,6 +192,9 @@ ON BancoFuego.Movimiento(fecha);
 
 CREATE INDEX idx_transaccion_fecha
 ON BancoFuego.Transaccion(fecha);
+
+CREATE INDEX idx_idempotencia_lookup
+ON BancoFuego.IdempotenciaOperacion(numero_tarjeta, endpoint, idempotency_key);
 
 
 

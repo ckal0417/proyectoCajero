@@ -1,15 +1,19 @@
 import { Router } from 'express';
 import { loginController } from './controllers/AuthController';
-import {
-    obtenerSaldoController,
-    depositarController,
-    retirarController,
-    transferirController,
-    obtenerHistorialController,
-} from './controllers/OperacionesController';
 import { verificarToken } from './middleware/AuthMiddleware';
+import { CuentaController } from './controllers/CuentaController';
+import { TarjetaController } from './controllers/TarjetaController';
+import { DepositoController } from './controllers/DepositoController';
+import { RetiroController } from './controllers/RetiroController';
+import { TransferenciaController } from './controllers/TransferenciaController';
+import { obtenerHistorialController, obtenerSaldoController } from './controllers/OperacionesController';
 
 const router = Router();
+const cuentaController = new CuentaController();
+const tarjetaController = new TarjetaController();
+const depositoController = new DepositoController();
+const retiroController = new RetiroController();
+const transferenciaController = new TransferenciaController();
 
 /**
  * @swagger
@@ -98,7 +102,9 @@ router.get('/operaciones/saldo', verificarToken, obtenerSaldoController);
  *       401:
  *         description: No autorizado
  */
-router.post('/operaciones/depositar', verificarToken, depositarController);
+router.post('/operaciones/depositar', verificarToken, (req, res, next) => {
+    depositoController.depositar(req, res, next);
+});
 
 /**
  * @swagger
@@ -126,7 +132,9 @@ router.post('/operaciones/depositar', verificarToken, depositarController);
  *       401:
  *         description: No autorizado
  */
-router.post('/operaciones/retirar', verificarToken, retirarController);
+router.post('/operaciones/retirar', verificarToken, (req, res, next) => {
+    retiroController.retirar(req, res, next);
+});
 
 /**
  * @swagger
@@ -157,7 +165,9 @@ router.post('/operaciones/retirar', verificarToken, retirarController);
  *       401:
  *         description: No autorizado
  */
-router.post('/operaciones/transferir', verificarToken, transferirController);
+router.post('/operaciones/transferir', verificarToken, (req, res, next) => {
+    transferenciaController.transferir(req, res, next);
+});
 
 /**
  * @swagger
@@ -181,5 +191,53 @@ router.post('/operaciones/transferir', verificarToken, transferirController);
  *         description: No autorizado
  */
 router.get('/operaciones/historial', verificarToken, obtenerHistorialController);
+
+/**
+ * @swagger
+ * /cuentas/{id}:
+ *   get:
+ *     summary: Obtiene el detalle de una cuenta por id
+ *     tags: [Cuentas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Cuenta encontrada
+ *       404:
+ *         description: Cuenta no encontrada
+ */
+router.get('/cuentas/:id', verificarToken, (req, res) => {
+    cuentaController.obtenerCuenta(req, res);
+});
+
+/**
+ * @swagger
+ * /tarjetas/{numeroTarjeta}/estado:
+ *   get:
+ *     summary: Consulta estado de la tarjeta
+ *     tags: [Tarjetas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: numeroTarjeta
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Estado obtenido
+ *       404:
+ *         description: Tarjeta no encontrada
+ */
+router.get('/tarjetas/:numeroTarjeta/estado', verificarToken, (req, res) => {
+    tarjetaController.estado(req, res);
+});
 
 export default router;

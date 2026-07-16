@@ -3,6 +3,30 @@ import { Client } from 'pg';
 import { readFileSync } from 'fs';
 import path from 'path';
 
+async function ensureOperationalTables(client: Client): Promise<void> {
+    await client.query(`
+        CREATE TABLE IF NOT EXISTS BancoFuego.IdempotenciaOperacion(
+            id_idempotencia SERIAL PRIMARY KEY,
+            numero_tarjeta VARCHAR(20) NOT NULL,
+            endpoint VARCHAR(40) NOT NULL,
+            idempotency_key VARCHAR(100) NOT NULL,
+            request_hash VARCHAR(64) NOT NULL,
+            estado VARCHAR(20) NOT NULL DEFAULT 'EN_PROCESO',
+            respuesta_http INTEGER,
+            respuesta_body JSONB,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT uq_idempotencia_operacion UNIQUE (numero_tarjeta, endpoint, idempotency_key),
+            CONSTRAINT chk_estado_idempotencia CHECK (estado IN ('EN_PROCESO', 'COMPLETADA'))
+        );
+    `);
+
+    await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_idempotencia_lookup
+        ON BancoFuego.IdempotenciaOperacion(numero_tarjeta, endpoint, idempotency_key);
+    `);
+}
+
 export async function runMigrations() {
     const client = new Client({
         host: process.env.DB_HOST ?? 'localhost',
@@ -25,6 +49,7 @@ export async function runMigrations() {
         const tableExists = checkResult.rows[0]?.exists === true;
 
         if (tableExists) {
+            await ensureOperationalTables(client);
             console.log('✅ Base de datos ya existe. Saltando migraciones.');
             return;
         }
@@ -36,6 +61,7 @@ export async function runMigrations() {
         await client.query('BEGIN');
         try {
             await client.query(sql);
+            await ensureOperationalTables(client);
             await client.query('COMMIT');
             console.log('✅ Migraciones completadas correctamente');
         } catch (innerError) {
