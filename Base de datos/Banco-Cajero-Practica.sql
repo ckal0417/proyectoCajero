@@ -106,6 +106,10 @@ CREATE TABLE BancoFuego.Transaccion(
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     estado estado_transaccion DEFAULT 'EXITOSA',
     descripcion TEXT,
+    referencia_externa VARCHAR(120),
+    idempotency_key VARCHAR(100),
+    estado_detalle TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_cajero INTEGER,
 
     CONSTRAINT chk_monto CHECK(monto > 0),

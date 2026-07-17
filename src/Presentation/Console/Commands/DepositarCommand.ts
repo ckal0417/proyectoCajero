@@ -35,7 +35,7 @@ export class DepositarCommand implements ICommand {
             return;
         }
 
-        Consola.exito("DepÃ³sito realizado correctamente.");
+        Consola.exito("Depósito realizado correctamente.");
 
         Consola.informacion("");
 

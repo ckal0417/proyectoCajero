@@ -13,6 +13,10 @@ export class Transaccion {
         private readonly estado: EstadoTransaccion,
         private readonly descripcion: string | undefined,
         private readonly idCajero: number | undefined,
+        private readonly referenciaExterna: string | undefined,
+        private readonly idempotencyKey: string | undefined,
+        private readonly estadoDetalle: string | undefined,
+        private readonly updatedAt: Date,
     ) {}
 
     static crear(datos: {
@@ -21,6 +25,10 @@ export class Transaccion {
         estado: EstadoTransaccion;
         descripcion?: string;
         idCajero?: number;
+        referenciaExterna?: string;
+        idempotencyKey?: string;
+        estadoDetalle?: string;
+        updatedAt?: Date;
     }): Transaccion {
         return new Transaccion(
             undefined,
@@ -30,6 +38,10 @@ export class Transaccion {
             datos.estado,
             datos.descripcion,
             datos.idCajero,
+            datos.referenciaExterna,
+            datos.idempotencyKey,
+            datos.estadoDetalle,
+            datos.updatedAt ?? new Date(),
         );
     }
 
@@ -41,6 +53,10 @@ export class Transaccion {
         estado: EstadoTransaccion;
         descripcion?: string;
         idCajero?: number;
+        referenciaExterna?: string;
+        idempotencyKey?: string;
+        estadoDetalle?: string;
+        updatedAt?: Date;
     }): Transaccion {
         return new Transaccion(
             datos.id,
@@ -50,6 +66,10 @@ export class Transaccion {
             datos.estado,
             datos.descripcion,
             datos.idCajero,
+            datos.referenciaExterna,
+            datos.idempotencyKey,
+            datos.estadoDetalle,
+            datos.updatedAt ?? datos.fecha,
         );
     }
 
@@ -83,5 +103,21 @@ export class Transaccion {
 
     obtenerIdCajero(): number | undefined {
         return this.idCajero;
+    }
+
+    obtenerReferenciaExterna(): string | undefined {
+        return this.referenciaExterna;
+    }
+
+    obtenerIdempotencyKey(): string | undefined {
+        return this.idempotencyKey;
+    }
+
+    obtenerEstadoDetalle(): string | undefined {
+        return this.estadoDetalle;
+    }
+
+    obtenerUpdatedAt(): Date {
+        return this.updatedAt;
     }
 }
