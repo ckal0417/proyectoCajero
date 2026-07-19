@@ -39,20 +39,27 @@ export class TransaccionRepositoryPostgres implements ITransaccionRepository {
             ],
         );
 
+        function omitirUndefined<T extends object>(obj: T): T {
+            return Object.fromEntries(
+                Object.entries(obj).filter(([, v]) => v !== undefined)
+            ) as T;
+        }
+
         const fila = resultado.rows[0]!;
-        const datosRebuild = {
+
+        const datosRebuild = omitirUndefined({
             id: fila.id_transaccion,
             tipo: fila.tipo,
             monto: Dinero.desde(parseFloat(fila.monto)),
             fecha: fila.fecha,
             estado: fila.estado,
-            ...(fila.descripcion === undefined ? {} : { descripcion: fila.descripcion }),
-            ...(fila.id_cajero === undefined ? {} : { idCajero: fila.id_cajero }),
-            ...(fila.referencia_externa === undefined ? {} : { referenciaExterna: fila.referencia_externa }),
-            ...(fila.idempotency_key === undefined ? {} : { idempotencyKey: fila.idempotency_key }),
-            ...(fila.estado_detalle === undefined ? {} : { estadoDetalle: fila.estado_detalle }),
-            ...(fila.updated_at === undefined ? {} : { updatedAt: fila.updated_at }),
-        } as Parameters<typeof Transaccion.reconstruir>[0];
+            descripcion: fila.descripcion,
+            idCajero: fila.id_cajero,
+            referenciaExterna: fila.referencia_externa,
+            idempotencyKey: fila.idempotency_key,
+            estadoDetalle: fila.estado_detalle,
+            updatedAt: fila.updated_at,
+        }) as Parameters<typeof Transaccion.reconstruir>[0];
 
         return Transaccion.reconstruir(datosRebuild);
     }
