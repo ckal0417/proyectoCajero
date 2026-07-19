@@ -5,6 +5,7 @@ import logger from '../../../shared/Logger';
 export interface AuthRequest extends Request {
     usuarioId?: string;
     numeroTarjeta?: string;
+    nombreCliente?: string;
 }
 
 function obtenerTokenDesdeCookie(cookieHeader: string | undefined): string | undefined {
@@ -42,9 +43,11 @@ export function verificarToken(
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-key') as {
             usuarioId: string;
             numeroTarjeta: string;
+            nombreCliente?: string;
         };
         req.usuarioId = decoded.usuarioId;
         req.numeroTarjeta = decoded.numeroTarjeta;
+        req.nombreCliente = decoded.nombreCliente;
         next();
     } catch (error) {
         logger.warn('Token inválido o expirado');
@@ -52,9 +55,9 @@ export function verificarToken(
     }
 }
 
-export function generarToken(usuarioId: string, numeroTarjeta: string): string {
+export function generarToken(usuarioId: string, numeroTarjeta: string, nombreCliente: string): string {
     return jwt.sign(
-        { usuarioId, numeroTarjeta },
+        { usuarioId, numeroTarjeta, nombreCliente },
         process.env.JWT_SECRET || 'secret-key',
         { expiresIn: '15m' }
     );

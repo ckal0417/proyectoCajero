@@ -1,4 +1,3 @@
-import { Usuario } from "../../../../Application/models/Usuario";
 import { Consola } from "../../../../shared/utils/Consola";
 import { SesionAutenticada } from "../Autenticacion/LoginMenu";
 
@@ -10,15 +9,9 @@ export class CabeceraMenu {
 
         Consola.titulo("CAJERO AUTOMÁTICO");
 
-        Consola.informacion(
-            `Número de cuenta: ${sesion.numeroCuenta}`
-        );
+        Consola.informacion(`Cliente: ${sesion.nombre}`);
 
-        Consola.informacion(
-            `Saldo actual: $${sesion.saldo}`
-        );
-
-        Consola.informacion("");
+        Consola.informacion(`Número de cuenta: ${sesion.numeroCuenta}`);
 
     }
 

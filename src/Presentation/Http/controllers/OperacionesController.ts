@@ -3,6 +3,19 @@ import { operacionesBancariasService } from '../../../Application/services/Opera
 import { AuthRequest } from '../middleware/AuthMiddleware';
 import { ResultadoOperacion } from '../../../Application/models/Resultado';
 
+function adjuntarClienteAutenticado(body: unknown, nombreCliente?: string): unknown {
+    if (!nombreCliente || typeof body !== 'object' || body === null) {
+        return body;
+    }
+
+    return {
+        ...body,
+        cliente: {
+            nombre: nombreCliente,
+        },
+    };
+}
+
 /**
  * GET /operaciones/saldo
  * Obtiene el saldo de la cuenta del usuario autenticado
@@ -16,7 +29,9 @@ export async function obtenerSaldoController(req: AuthRequest, res: Response): P
         return;
     }
 
-    res.status(resultado.valor.status).json(resultado.valor.body);
+    res
+        .status(resultado.valor.status)
+        .json(adjuntarClienteAutenticado(resultado.valor.body, req.nombreCliente));
 }
 
 /**
@@ -32,5 +47,7 @@ export async function obtenerHistorialController(req: AuthRequest, res: Response
         return;
     }
 
-    res.status(resultado.valor.status).json(resultado.valor.body);
+    res
+        .status(resultado.valor.status)
+        .json(adjuntarClienteAutenticado(resultado.valor.body, req.nombreCliente));
 }

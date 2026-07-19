@@ -1,17 +1,8 @@
 import { Response } from 'express';
 import { AuthRequest, generarToken } from '../middleware/AuthMiddleware';
-import { TarjetaRepositoryPostgres } from '../../../Infrastructure/Database/Repositories/TarjetaRepositoryPostgres';
-import { AutenticacionRepositoryPostgres } from '../../../Infrastructure/Database/Repositories/AutenticacionRepositoryPostgres';
-import { CuentaRepositoryPostgres } from '../../../Infrastructure/Database/Repositories/CuentaRepositoryPostgres';
-import { PinHasherBcrypt } from '../../../Infrastructure/Persistence/PinHasherBcrypt';
 import logger from '../../../shared/Logger';
 import { autenticacionService } from '../../../Application/services/AutenticationService';
 import { ResultadoOperacion } from '../../../Application/models/Resultado';
-
-const tarjetaRepository = new TarjetaRepositoryPostgres();
-const autenticacionRepository = new AutenticacionRepositoryPostgres();
-const cuentaRepository = new CuentaRepositoryPostgres();
-const pinHasher = new PinHasherBcrypt();
 
 /**
  * POST /auth/login
@@ -37,8 +28,20 @@ export async function loginController(req: AuthRequest, res: Response): Promise<
         return;
     }
 
-    const token = generarToken(resultado.valor.numeroTarjeta, resultado.valor.numeroTarjeta);
+    const token = generarToken(
+        resultado.valor.numeroTarjeta,
+        resultado.valor.numeroTarjeta,
+        resultado.valor.nombre
+    );
     res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 });
-    res.json({ mensaje: 'Login exitoso', token, usuario: { nombre: 'Cliente', numeroTarjeta: resultado.valor.numeroTarjeta, saldo: resultado.valor.saldo } });
+    res.json({
+        mensaje: 'Login exitoso',
+        token,
+        usuario: {
+            nombre: resultado.valor.nombre,
+            numeroTarjeta: resultado.valor.numeroTarjeta,
+            saldo: resultado.valor.saldo,
+        },
+    });
 }
 

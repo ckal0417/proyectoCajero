@@ -3,6 +3,7 @@ import { NumeroTarjeta } from "../Value-Objects/NumeroTarjeta";
 import { ValidationError, TarjetaBloqueadaError, TarjetaVencidaError } from "../../shared/Errors";
 
 export class Tarjeta {
+  
   private constructor(
     private readonly id: number | undefined,
     private readonly numeroTarjeta: NumeroTarjeta,
@@ -11,6 +12,7 @@ export class Tarjeta {
     private readonly cvv: string, // nunca se expone en toString/logs
     private activa: boolean,
     private readonly idCuenta: number,
+    private readonly nombreCliente: string,
   ) {}
 
   static crear(datos: {
@@ -19,6 +21,7 @@ export class Tarjeta {
     fechaVencimiento: Date;
     cvv: string;
     idCuenta: number;
+    nombreCliente?: string;
   }): Tarjeta {
     if (!/^\d{3,4}$/.test(datos.cvv)) {
       throw new ValidationError('El CVV debe tener 3 o 4 dígitos');
@@ -34,6 +37,7 @@ export class Tarjeta {
       datos.cvv,
       true,
       datos.idCuenta,
+      datos.nombreCliente ?? '',
     );
   }
 
@@ -45,6 +49,7 @@ export class Tarjeta {
     cvv: string;
     activa: boolean;
     idCuenta: number;
+    nombreCliente?: string;
   }): Tarjeta {
     return new Tarjeta(
       datos.id,
@@ -54,6 +59,7 @@ export class Tarjeta {
       datos.cvv,
       datos.activa,
       datos.idCuenta,
+      datos.nombreCliente ?? '',
     );
   }
 
@@ -90,4 +96,9 @@ export class Tarjeta {
   obtenerNumeroTarjeta(): NumeroTarjeta {
     return this.numeroTarjeta;
   }
+
+  obtenerNombre(): string {
+    return this.nombreCliente;
+  }
+
 }

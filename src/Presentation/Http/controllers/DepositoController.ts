@@ -23,6 +23,16 @@ export class DepositoController {
             return;
         }
 
-        res.status(resultado.valor.status).json(resultado.valor.body);
+        const body =
+            authReq.nombreCliente && typeof resultado.valor.body === 'object' && resultado.valor.body !== null
+                ? {
+                    ...resultado.valor.body,
+                    cliente: {
+                        nombre: authReq.nombreCliente,
+                    },
+                }
+                : resultado.valor.body;
+
+        res.status(resultado.valor.status).json(body);
     }
 }

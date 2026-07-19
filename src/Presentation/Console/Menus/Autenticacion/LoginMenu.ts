@@ -9,6 +9,7 @@ export interface SesionAutenticada {
     numeroTarjeta: string;
     numeroCuenta: string | NumeroCuenta;
     saldo: number;
+    nombre: string;
 }
 
 export class LoginMenu {
@@ -92,7 +93,8 @@ export class LoginMenu {
         onLoginExitoso({
             numeroTarjeta: resultado.valor.numeroTarjeta,
             numeroCuenta: resultado.valor.numeroCuenta,
-            saldo: resultado.valor.saldo
+            saldo: resultado.valor.saldo,
+            nombre: resultado.valor.nombre
         });
 
     }

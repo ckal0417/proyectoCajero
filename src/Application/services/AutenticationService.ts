@@ -9,7 +9,9 @@ import logger from '../../shared/Logger';
 import { NumeroCuenta } from '../../Domain/Value-Objects/NumeroCuenta';
 import { Resultado, ResultadoOperacion } from '../models/Resultado';
 
+
 export interface DatosAutenticacion {
+    nombre: string;
     numeroTarjeta: string;
     numeroCuenta: string | NumeroCuenta;
     saldo: number;
@@ -57,6 +59,7 @@ export class AutenticacionService {
 
             return ResultadoOperacion.exitoso({
                 numeroTarjeta,
+                nombre: tarjeta.obtenerNombre(),
                 numeroCuenta: cuenta?.obtenerNumeroCuenta() ?? '',
                 saldo: cuenta?.obtenerSaldo().toNumber() ?? 0,
             });

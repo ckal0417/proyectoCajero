@@ -13,6 +13,7 @@ interface FilaTarjeta {
     cvv: string;
     activa: boolean;
     id_cuenta: number;
+    nombre_cliente: string;
 }
 
 export class TarjetaRepositoryPostgres implements ITarjetaRepository {
@@ -37,6 +38,7 @@ export class TarjetaRepositoryPostgres implements ITarjetaRepository {
             cvv: fila.cvv,
             activa: fila.activa,
             idCuenta: fila.id_cuenta,
+            nombreCliente: fila.nombre_cliente,
         });
     }
 }
