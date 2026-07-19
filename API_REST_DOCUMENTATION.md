@@ -1,4 +1,4 @@
-# 🚀 API REST - Banco Fuego
+# API REST - Banco Fuego
 
 ## Resumen de Cambios
 

@@ -1,17 +1,8 @@
-<<<<<<< Updated upstream:src/Presentation/Console/Commands/CommandFactory.ts
-import { CajeroService } from "../Services/CajeroService";
 import { DepositoService } from "../../../Application/services/comandos/DepositoService";
 import { RetiroService } from "../../../Application/services/comandos/RetiroService";
 import { SaldoService } from "../../../Application/services/comandos/SaldoService";
 import { HistorialService } from "../../../Application/services/comandos/HistorialService";
 import { TransferenciaService } from "../../../Application/services/comandos/transferencia/TransferenciaService";
-=======
-import { DepositoService } from "../Application/services/comandos/DepositoService";
-import { RetiroService } from "../Application/services/comandos/RetiroService";
-import { SaldoService } from "../Application/services/comandos/SaldoService";
-import { HistorialService } from "../Application/services/comandos/HistorialService";
-import { TransferenciaService } from "../Application/services/comandos/transferencia/TransferenciaService";
->>>>>>> Stashed changes:src/commands/CommandFactory.ts
 import { ConsultarSaldoCommand } from "./ConsultarSaldoCommand";
 import { DepositarCommand } from "./DepositarCommand";
 import { RetirarCommand } from "./RetirarCommand";
