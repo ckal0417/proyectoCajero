@@ -18,7 +18,7 @@ export class TransferenciaService {
         private transferenciaLocalService: TransferenciaLocalService,
         private transferenciaInterbancariaService: TransferenciaInterbancariaService,
         private eventBus: EventBus
-    ) {}
+    ) { }
 
     public realizarTransferenciaLocal(
         numeroCuentaOrigen: string,
