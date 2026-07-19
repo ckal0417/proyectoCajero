@@ -163,7 +163,7 @@ export class TransferenciaService {
         );
 
         const transaccion = Transaccion.crear({
-            tipo: TipoTransaccion.TRANSFERENCIA_INTERBANCARIA,
+            tipo: TipoTransaccion.TRANSFERENCIA_EXTERNA,
             monto: Dinero.desde(montoTransferencia),
             estado: EstadoTransaccion.EXITOSA,
             descripcion: `Transferencia interbancaria a ${bancoDestino}, cuenta ${numeroCuentaDestino}`,

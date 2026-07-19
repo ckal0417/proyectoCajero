@@ -13,6 +13,15 @@ interface FilaCuentaDestino {
     id_cuenta: number;
 }
 
+interface FilaCuentaNumero {
+    numero_cuenta: string;
+}
+
+interface FilaTitularCuenta {
+    numero_cuenta: string;
+    nombre_cliente: string;
+}
+
 interface FilaCuentaBloqueada {
     id_cuenta: number;
     saldo: string;
@@ -46,6 +55,11 @@ type EstadoIdempotencia =
 export interface ServiceResponse {
     status: number;
     body: unknown;
+}
+
+interface TitularCuentaResponse {
+    numeroCuenta: string;
+    nombreCliente: string;
 }
 
 export class OperacionesBancariasService {
@@ -93,7 +107,7 @@ export class OperacionesBancariasService {
 
             const resultado = await this.pool.query<FilaHistorial>(
                 `
-                SELECT m.tipo, m.monto, m.fecha
+                SELECT m.naturaleza AS tipo, m.monto, m.fecha
                 FROM BancoFuego.Movimiento m
                 WHERE m.id_cuenta = $1
                 ORDER BY m.fecha DESC
@@ -117,6 +131,39 @@ export class OperacionesBancariasService {
         } catch (error) {
             logger.error('Error obteniendo historial:', error);
             return this.fallido('Error interno del servidor', 500);
+        }
+    }
+
+    async obtenerTitularCuenta(numeroCuenta: string): Promise<Resultado<TitularCuentaResponse>> {
+        try {
+            const numeroCuentaNormalizado = numeroCuenta.trim();
+            if (numeroCuentaNormalizado.length === 0) {
+                return ResultadoOperacion.fallido({ mensaje: 'Número de cuenta destino inválido', statusCode: 400 });
+            }
+
+            const resultado = await this.pool.query<FilaTitularCuenta>(
+                `
+                SELECT c.numero_cuenta, CONCAT(cl.nombres, ' ', cl.apellidos) AS nombre_cliente
+                FROM BancoFuego.Cuenta c
+                INNER JOIN BancoFuego.Cliente cl ON cl.id_cliente = c.id_cliente
+                WHERE c.numero_cuenta = $1
+                LIMIT 1
+                `,
+                [numeroCuentaNormalizado],
+            );
+
+            if (resultado.rowCount === 0) {
+                return ResultadoOperacion.fallido({ mensaje: 'Cuenta destino no encontrada', statusCode: 404 });
+            }
+
+            const titular = resultado.rows[0]!;
+            return ResultadoOperacion.exitoso({
+                numeroCuenta: titular.numero_cuenta,
+                nombreCliente: titular.nombre_cliente,
+            });
+        } catch (error) {
+            logger.error('Error obteniendo titular de cuenta:', error);
+            return ResultadoOperacion.fallido({ mensaje: 'Error interno del servidor', statusCode: 500 });
         }
     }
 
@@ -214,8 +261,8 @@ export class OperacionesBancariasService {
             await client.query(
                 `
                 INSERT INTO BancoFuego.Movimiento
-                    (tipo, monto, saldo_anterior, saldo_nuevo, id_cuenta, id_transaccion)
-                VALUES ('DEPOSITO', $1, $2, $3, $4, $5)
+                    (naturaleza, monto, saldo_anterior, saldo_nuevo, id_cuenta, id_transaccion)
+                VALUES ('CREDITO', $1, $2, $3, $4, $5)
                 `,
                 [montoNumero, saldoAnterior, saldoNuevo, idCuenta, idTransaccion],
             );
@@ -352,8 +399,8 @@ export class OperacionesBancariasService {
             await client.query(
                 `
                 INSERT INTO BancoFuego.Movimiento
-                    (tipo, monto, saldo_anterior, saldo_nuevo, id_cuenta, id_transaccion)
-                VALUES ('RETIRO', $1, $2, $3, $4, $5)
+                    (naturaleza, monto, saldo_anterior, saldo_nuevo, id_cuenta, id_transaccion)
+                VALUES ('DEBITO', $1, $2, $3, $4, $5)
                 `,
                 [montoNumero, saldoAnterior, saldoNuevo, idCuenta, idTransaccion],
             );
@@ -450,6 +497,12 @@ export class OperacionesBancariasService {
                 return this.fallido('Cuenta origen no encontrada', 404);
             }
 
+            const numeroCuentaOrigen = await this.obtenerNumeroCuentaPorIdTx(client, idCuentaOrigen);
+            if (numeroCuentaOrigen === null) {
+                await client.query('ROLLBACK');
+                return this.fallido('Cuenta origen no encontrada', 404);
+            }
+
             const idCuentaDestino = await this.obtenerIdCuentaPorNumeroTx(client, numeroCuentaDestino);
             if (idCuentaDestino === null) {
                 await client.query('ROLLBACK');
@@ -517,7 +570,7 @@ export class OperacionesBancariasService {
             const transaccion = await client.query<FilaTransaccion>(
                 `
                 INSERT INTO BancoFuego.Transaccion (tipo, monto, estado, descripcion)
-                VALUES ('TRANSFERENCIA', $1, 'EXITOSA', 'Transferencia interna')
+                VALUES ('TRANSFERENCIA_INTERNA', $1, 'EXITOSA', 'Transferencia interna')
                 RETURNING id_transaccion
                 `,
                 [montoNumero],
@@ -528,10 +581,10 @@ export class OperacionesBancariasService {
             await client.query(
                 `
                 INSERT INTO BancoFuego.Movimiento
-                    (tipo, monto, saldo_anterior, saldo_nuevo, id_cuenta, id_transaccion)
+                    (naturaleza, monto, saldo_anterior, saldo_nuevo, id_cuenta, id_transaccion)
                 VALUES
-                    ('TRANSFERENCIA', $1, $2, $3, $4, $6),
-                    ('TRANSFERENCIA', $1, $5, $7, $8, $6)
+                    ('DEBITO', $1, $2, $3, $4, $6),
+                    ('CREDITO', $1, $5, $7, $8, $6)
                 `,
                 [
                     montoNumero,
@@ -547,6 +600,8 @@ export class OperacionesBancariasService {
 
             const respuesta = {
                 mensaje: 'Transferencia exitosa',
+                numeroCuentaOrigen,
+                numeroCuentaDestino,
                 nuevoSaldo: saldoNuevoOrigen,
             };
 
@@ -564,7 +619,7 @@ export class OperacionesBancariasService {
             await client.query('COMMIT');
 
             logger.info(
-                `Transferencia exitosa: $${montoNumero} desde ${args.numeroTarjeta} a ${numeroCuentaDestino}`,
+                `Transferencia exitosa: $${montoNumero} desde cuenta ${numeroCuentaOrigen} a ${numeroCuentaDestino}`,
             );
             return ResultadoOperacion.exitoso({ status: 200, body: respuesta });
         } catch (error) {
@@ -651,6 +706,24 @@ export class OperacionesBancariasService {
         }
 
         return resultado.rows[0]!.id_cuenta;
+    }
+
+    private async obtenerNumeroCuentaPorIdTx(client: PoolClient, idCuenta: number): Promise<string | null> {
+        const resultado = await client.query<FilaCuentaNumero>(
+            `
+            SELECT c.numero_cuenta
+            FROM BancoFuego.Cuenta c
+            WHERE c.id_cuenta = $1
+            LIMIT 1
+            `,
+            [idCuenta],
+        );
+
+        if (resultado.rowCount === 0) {
+            return null;
+        }
+
+        return resultado.rows[0]!.numero_cuenta;
     }
 
     private async iniciarIdempotencia(

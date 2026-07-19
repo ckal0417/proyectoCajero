@@ -5,19 +5,18 @@ export const TIPOS_TARJETA = ['DEBITO', 'CREDITO'] as const;
 export type TipoTarjeta = (typeof TIPOS_TARJETA)[number];
     
 export const TIPOS_TRANSACCION = [
-    'CONSULTA',
     'DEPOSITO',
     'RETIRO',
-    'TRANSFERENCIA',
     'TRANSFERENCIA_INTERNA',
-    'TRANSFERENCIA_INTERBANCARIA',
+    'TRANSFERENCIA_EXTERNA',
 ] as const;
 export type TipoTransaccion = (typeof TIPOS_TRANSACCION)[number];
     
 export const ESTADOS_TRANSACCION = ['PENDIENTE', 'EXITOSA', 'FALLIDA', 'CANCELADA'] as const;
 export type EstadoTransaccion = (typeof ESTADOS_TRANSACCION)[number];
-    
-export type TipoMovimiento = TipoTransaccion;
+
+export const NATURALEZAS_MOVIMIENTO = ['CREDITO', 'DEBITO'] as const;
+export type TipoMovimiento = (typeof NATURALEZAS_MOVIMIENTO)[number];
 
 export function esValorValido<T extends string>(
     valoresPermitidos: readonly T[],

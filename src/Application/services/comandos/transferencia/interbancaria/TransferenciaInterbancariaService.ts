@@ -52,7 +52,7 @@ export class TransferenciaInterbancariaService {
 
     async ejecutar(dto: TransferirDineroDTO): Promise<Transaccion> {
         return Transaccion.crear({
-            tipo: TipoTransaccion.TRANSFERENCIA_INTERBANCARIA,
+            tipo: TipoTransaccion.TRANSFERENCIA_EXTERNA,
             monto: Dinero.desde(dto.montoTransferencia),
             estado: EstadoTransaccion.PENDIENTE,
             descripcion: `Solicitud interbancaria a ${dto.bancoDestino} - cuenta ${dto.numeroCuentaDestino}`,

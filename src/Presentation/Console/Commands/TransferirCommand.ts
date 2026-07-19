@@ -20,7 +20,7 @@ export class TransferirCommand implements ICommand {
         const tipoTransferencia =
             parametros[1] as TipoTransferencia;
 
-        if (tipoTransferencia === TipoTransferencia.LOCAL) {
+        if (tipoTransferencia === TipoTransferencia.INTERNA) {
 
             const numeroCuentaDestino =
                 parametros[2] as string;
@@ -42,7 +42,7 @@ export class TransferirCommand implements ICommand {
 
         if (
             tipoTransferencia ===
-            TipoTransferencia.INTERBANCARIA
+            TipoTransferencia.EXTERNA
         ) {
 
             const bancoDestino =

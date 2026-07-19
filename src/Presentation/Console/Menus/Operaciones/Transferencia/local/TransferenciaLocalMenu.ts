@@ -37,7 +37,7 @@ export class TransferenciaLocalMenu {
 
                             this.cuenta,
 
-                            TipoTransferencia.LOCAL,
+                            TipoTransferencia.INTERNA,
 
                             cuentaDestino,
 

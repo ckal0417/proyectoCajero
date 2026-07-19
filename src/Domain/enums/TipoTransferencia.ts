@@ -1,4 +1,4 @@
 export enum TipoTransferencia {
-    LOCAL = "LOCAL",
-    INTERBANCARIA = "INTERBANCARIA"
+    INTERNA = "INTERNA",
+    EXTERNA = "EXTERNA"
 }

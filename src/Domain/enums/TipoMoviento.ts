@@ -1,6 +1,4 @@
 export enum TipoMovimiento {
-    DEPOSITO = "DEPOSITO",
-    RETIRO = "RETIRO",
-    TRANSFERENCIA = "TRANSFERENCIA",
-    CONSULTA = "CONSULTA"
+    CREDITO = "CREDITO",
+    DEBITO = "DEBITO"
 }

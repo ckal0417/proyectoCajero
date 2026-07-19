@@ -39,7 +39,7 @@ export class TransferenciaInterbancariaMenu {
                                 this.cajeroService.ejecutar(
                                     "transferir",
                                     this.cuentaOrigen,
-                                    TipoTransferencia.INTERBANCARIA,
+                                    TipoTransferencia.EXTERNA,
                                     bancoDestino,
                                     numeroCuentaDestino,
                                     montoTransferencia

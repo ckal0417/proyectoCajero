@@ -20,7 +20,21 @@ export class TransferenciaMenu {
 
         this.consola.question(
             "Ingrese el número de la cuenta destino: ",
-            (numeroCuentaDestino: string) => {
+            async (numeroCuentaDestino: string) => {
+
+                const numeroCuentaDestinoNormalizado = numeroCuentaDestino.trim();
+                const titularResultado = await operacionesBancariasService.obtenerTitularCuenta(numeroCuentaDestinoNormalizado);
+
+                if (!titularResultado.estado) {
+                    Consola.error(ResultadoOperacion.obtenerMensajeError(titularResultado));
+                    this.consola.question(
+                        "\nPresione ENTER para continuar...",
+                        () => callback()
+                    );
+                    return;
+                }
+
+                Consola.informacion(`Titular destino: ${titularResultado.valor.nombreCliente}`);
 
                 this.consola.question(
                     "Ingrese el monto: ",
@@ -31,13 +45,20 @@ export class TransferenciaMenu {
 
                         const resultado = await operacionesBancariasService.transferir({
                             numeroTarjeta: this.numeroTarjeta,
-                            numeroCuentaDestino,
+                            numeroCuentaDestino: numeroCuentaDestinoNormalizado,
                             monto: montoTransferencia
                         });
 
                         if (resultado.estado) {
-                            const body = resultado.valor.body as { mensaje: string; nuevoSaldo: number };
+                            const body = resultado.valor.body as {
+                                mensaje: string;
+                                numeroCuentaOrigen: string;
+                                numeroCuentaDestino: string;
+                                nuevoSaldo: number;
+                            };
                             Consola.exito(body.mensaje);
+                            Consola.informacion(`Cuenta origen: ${body.numeroCuentaOrigen}`);
+                            Consola.informacion(`Cuenta destino: ${body.numeroCuentaDestino}`);
                             Consola.informacion(`Saldo actual: ${Formato.dinero(body.nuevoSaldo)}`);
                         } else {
                             Consola.error(ResultadoOperacion.obtenerMensajeError(resultado));

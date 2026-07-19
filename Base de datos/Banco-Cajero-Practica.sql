@@ -281,7 +281,7 @@ INSERT INTO Transaccion
 VALUES
 ('DEPOSITO',500,'EXITOSA','Depósito en efectivo',1),
 ('RETIRO',100,'EXITOSA','Retiro por cajero',1),
-('TRANSFERENCIA',250,'EXITOSA','Transferencia entre cuentas',2),
+('TRANSFERENCIA_INTERNA',250,'EXITOSA','Transferencia entre cuentas',2),
 ('RETIRO',50,'FALLIDA','Fondos insuficientes',3),
 ('DEPOSITO',1000,'EXITOSA','Depósito de nómina',2);
 
@@ -290,10 +290,10 @@ VALUES
 --------------------------------------------------
 
 INSERT INTO Movimiento
-(tipo,monto,saldo_anterior,saldo_nuevo,id_cuenta,id_transaccion)
+(naturaleza,monto,saldo_anterior,saldo_nuevo,id_cuenta,id_transaccion)
 VALUES
-('DEPOSITO',500,700,1200,1,1),
-('RETIRO',100,3600,3500,2,2),
-('TRANSFERENCIA',250,1150,900,3,3),
-('RETIRO',50,5400,5400,4,4),
-('DEPOSITO',1000,4400,5400,4,5);
+('CREDITO',500,700,1200,1,1),
+('DEBITO',100,3600,3500,2,2),
+('DEBITO',250,1150,900,3,3),
+('DEBITO',50,5400,5400,4,4),
+('CREDITO',1000,4400,5400,4,5);
