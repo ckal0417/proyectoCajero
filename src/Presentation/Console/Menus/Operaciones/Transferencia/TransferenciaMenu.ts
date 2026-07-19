@@ -2,7 +2,7 @@ import * as readline from "readline";
 import { Consola } from "../../../../../shared/utils/Consola";
 import { Formato } from "../../../../../shared/utils/Formato";
 import { ResultadoOperacion } from "../../../../../Application/models/Resultado";
-import { operacionesBancariasService } from "../../../../../Application/services/OperacionesBancariasService";
+import { operacionesBancariasService } from "../../../../../bootstrap/services";
 
 export class TransferenciaMenu {
 

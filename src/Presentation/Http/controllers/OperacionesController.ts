@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { operacionesBancariasService } from '../../../Application/services/OperacionesBancariasService';
+import { operacionesBancariasService } from '../../../bootstrap/services';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 import { ResultadoOperacion } from '../../../Application/models/Resultado';
 

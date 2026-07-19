@@ -74,7 +74,7 @@ function iniciarConsola(): void {
 
 if (APP_MODE === 'console') {
     iniciarConsola();
-} 
+}
 else {
     iniciarAplicacion();
 }

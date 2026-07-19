@@ -1,10 +1,6 @@
-import { CuentaRepositoryPostgres } from '../../Infrastructure/Database/Repositories/CuentaRepositoryPostgres';
-import { PostgresConnection } from '../../Infrastructure/Database/PostgresConnection';
 import { Resultado } from '../models/Resultado';
 import { ConsultaTitularCuentaService } from './operaciones/ConsultaTitularCuentaService';
-import { CuentaOperacionQueryService } from './operaciones/CuentaOperacionQueryService';
 import { DepositoOperacionService } from './operaciones/DepositoOperacionService';
-import { IdempotenciaService } from './operaciones/IdempotenciaService';
 import { ObtenerHistorialService } from './operaciones/ObtenerHistorialService';
 import { ObtenerSaldoService } from './operaciones/ObtenerSaldoService';
 import { RetiroOperacionService } from './operaciones/RetiroOperacionService';
@@ -13,49 +9,30 @@ import { TransferenciaOperacionService } from './operaciones/TransferenciaIntern
 
 export { ServiceResponse } from './operaciones/types';
 
+interface OperacionesBancariasDependencies {
+    obtenerSaldoService: ObtenerSaldoService;
+    obtenerHistorialService: ObtenerHistorialService;
+    consultaTitularCuentaService: ConsultaTitularCuentaService;
+    depositoOperacionService: DepositoOperacionService;
+    retiroOperacionService: RetiroOperacionService;
+    transferenciaOperacionService: TransferenciaOperacionService;
+}
+
 export class OperacionesBancariasService {
-    private readonly cuentaRepository = new CuentaRepositoryPostgres();
-
-    private readonly pool = PostgresConnection.obtenerPool();
-
-    private readonly cuentaQueryService = new CuentaOperacionQueryService(this.pool);
-
-    private readonly idempotenciaService = new IdempotenciaService();
-
-    private readonly obtenerSaldoService = new ObtenerSaldoService(this.cuentaRepository, this.cuentaQueryService);
-
-    private readonly obtenerHistorialService = new ObtenerHistorialService(this.cuentaQueryService);
-
-    private readonly consultaTitularCuentaService = new ConsultaTitularCuentaService(this.cuentaQueryService);
-
-    private readonly depositoOperacionService = new DepositoOperacionService(
-        this.pool,
-        this.cuentaQueryService,
-        this.idempotenciaService,
-    );
-
-    private readonly retiroOperacionService = new RetiroOperacionService(
-        this.pool,
-        this.cuentaQueryService,
-        this.idempotenciaService,
-    );
-
-    private readonly transferenciaOperacionService = new TransferenciaOperacionService(
-        this.pool,
-        this.cuentaQueryService,
-        this.idempotenciaService,
-    );
+    constructor(
+        private readonly dependencies: OperacionesBancariasDependencies,
+    ) { }
 
     async obtenerSaldo(numeroTarjeta: string | undefined): Promise<Resultado<ServiceResponse>> {
-        return this.obtenerSaldoService.ejecutar(numeroTarjeta);
+        return this.dependencies.obtenerSaldoService.ejecutar(numeroTarjeta);
     }
 
     async obtenerHistorial(numeroTarjeta: string | undefined): Promise<Resultado<ServiceResponse>> {
-        return this.obtenerHistorialService.ejecutar(numeroTarjeta);
+        return this.dependencies.obtenerHistorialService.ejecutar(numeroTarjeta);
     }
 
     async obtenerTitularCuenta(numeroCuenta: string): Promise<Resultado<TitularCuentaResponse>> {
-        return this.consultaTitularCuentaService.ejecutar(numeroCuenta);
+        return this.dependencies.consultaTitularCuentaService.ejecutar(numeroCuenta);
     }
 
     async depositar(args: {
@@ -63,7 +40,7 @@ export class OperacionesBancariasService {
         idempotencyKey?: string | null;
         monto: unknown;
     }): Promise<Resultado<ServiceResponse>> {
-        return this.depositoOperacionService.ejecutar(args);
+        return this.dependencies.depositoOperacionService.ejecutar(args);
     }
 
     async retirar(args: {
@@ -71,7 +48,7 @@ export class OperacionesBancariasService {
         idempotencyKey?: string | null;
         monto: unknown;
     }): Promise<Resultado<ServiceResponse>> {
-        return this.retiroOperacionService.ejecutar(args);
+        return this.dependencies.retiroOperacionService.ejecutar(args);
     }
 
     async transferir(args: {
@@ -83,7 +60,7 @@ export class OperacionesBancariasService {
         numeroCuentaDestino: unknown;
         monto: unknown;
     }): Promise<Resultado<ServiceResponse>> {
-        return this.transferenciaOperacionService.ejecutar(args);
+        return this.dependencies.transferenciaOperacionService.ejecutar(args);
     }
 
     obtenerIdempotencyKey(headerValue: string | string[] | undefined): string | null {
@@ -101,5 +78,3 @@ export class OperacionesBancariasService {
         return null;
     }
 }
-
-export const operacionesBancariasService = new OperacionesBancariasService();

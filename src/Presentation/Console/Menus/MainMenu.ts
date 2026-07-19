@@ -1,6 +1,6 @@
 // Presentation/Console/Menus/MainMenu.ts
 import * as readline from "readline";
-import { operacionesBancariasService } from "../../../Application/services/OperacionesBancariasService";
+import { operacionesBancariasService } from "../../../bootstrap/services";
 import { Consola } from "../../../shared/utils/Consola";
 import { LoginMenu, SesionAutenticada } from "./Autenticacion/LoginMenu";
 import { DepositoMenu } from "./Operaciones/DepositoMenu";
@@ -17,7 +17,7 @@ export class MainMenu {
 
     constructor(
         private consola: readline.Interface
-    ) {}
+    ) { }
 
     public iniciar(): void {
 

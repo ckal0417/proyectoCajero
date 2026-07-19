@@ -1,5 +1,5 @@
 import * as readline from "readline";
-import { operacionesBancariasService } from "../../../../Application/services/OperacionesBancariasService";
+import { operacionesBancariasService } from "../../../../bootstrap/services";
 import { Consola } from "../../../../shared/utils/Consola";
 import { Formato } from "../../../../shared/utils/Formato";
 import { ResultadoOperacion } from "../../../../Application/models/Resultado";
@@ -15,7 +15,7 @@ export class HistorialMenu {
     constructor(
         private numeroTarjeta: string,
         private consola: readline.Interface
-    ) {}
+    ) { }
 
     public async iniciar(callback: () => void): Promise<void> {
 

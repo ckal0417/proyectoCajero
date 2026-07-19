@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/AuthMiddleware';
-import { operacionesBancariasService } from '../../../Application/services/OperacionesBancariasService';
+import { operacionesBancariasService } from '../../../bootstrap/services';
 import { ResultadoOperacion } from '../../../Application/models/Resultado';
 
 export class DepositoController {

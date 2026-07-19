@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 import { ResultadoOperacion } from '../../../Application/models/Resultado';
-import { operacionesBancariasService } from '../../../Application/services/OperacionesBancariasService';
+import { operacionesBancariasService } from '../../../bootstrap/services';
 
 export class TransferenciaController {
     async transferir(req: Request, res: Response, next: NextFunction): Promise<void> {
