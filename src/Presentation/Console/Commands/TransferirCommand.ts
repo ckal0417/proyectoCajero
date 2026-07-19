@@ -1,8 +1,9 @@
 ﻿import { ICommand } from "../Interfaces/ICommand";
-import { Cuenta } from "../../../Domain/Entities/Cuenta";
+import { Cuenta } from "../../../Application/models/Cuenta";
 import { Consola } from "../../../shared/utils/Consola";
 import { TransferenciaService } from "../../../Application/services/comandos/transferencia/TransferenciaService";
 import { TipoTransferencia } from "../../../Domain/enums/TipoTransferencia";
+import { Resultado } from "../../../Application/models/Resultado";
 export class TransferirCommand implements ICommand {
 
     public nombre: string = "transferir";
@@ -68,15 +69,12 @@ export class TransferirCommand implements ICommand {
         }
 
         Consola.error(
-            "El tipo de transferencia no es vÃ¡lido."
+            "El tipo de transferencia no es válido."
         );
     }
 
     private mostrarResultado(
-        resultado: {
-            estado: boolean;
-            error?: string;
-        }
+        resultado: Resultado<void>
     ): void {
 
         if (!resultado.estado) {

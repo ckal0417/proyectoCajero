@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { operacionesBancariasService } from '../../../Application/services/OperacionesBancariasService';
 import { AuthRequest } from '../middleware/AuthMiddleware';
+import { ResultadoOperacion } from '../../../Application/models/Resultado';
 
 /**
  * GET /operaciones/saldo
@@ -8,7 +9,14 @@ import { AuthRequest } from '../middleware/AuthMiddleware';
  */
 export async function obtenerSaldoController(req: AuthRequest, res: Response): Promise<void> {
     const resultado = await operacionesBancariasService.obtenerSaldo(req.numeroTarjeta);
-    res.status(resultado.status).json(resultado.body);
+    if (!resultado.estado) {
+        res.status(ResultadoOperacion.obtenerStatusError(resultado, 400)).json({
+            error: ResultadoOperacion.obtenerMensajeError(resultado),
+        });
+        return;
+    }
+
+    res.status(resultado.valor.status).json(resultado.valor.body);
 }
 
 /**
@@ -17,5 +25,12 @@ export async function obtenerSaldoController(req: AuthRequest, res: Response): P
  */
 export async function obtenerHistorialController(req: AuthRequest, res: Response): Promise<void> {
     const resultado = await operacionesBancariasService.obtenerHistorial(req.numeroTarjeta);
-    res.status(resultado.status).json(resultado.body);
+    if (!resultado.estado) {
+        res.status(ResultadoOperacion.obtenerStatusError(resultado, 400)).json({
+            error: ResultadoOperacion.obtenerMensajeError(resultado),
+        });
+        return;
+    }
+
+    res.status(resultado.valor.status).json(resultado.valor.body);
 }

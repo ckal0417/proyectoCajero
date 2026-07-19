@@ -1,7 +1,8 @@
 import { ITransaccionRepository } from '../../../Application/Ports/ITransaccionRepository';
 import { Transaccion } from '../../../Domain/Entities/Transaccion';
 import { Dinero } from '../../../Domain/Value-Objects/Dinero';
-import { TipoTransaccion, EstadoTransaccion } from "../../../Domain/enums/TiposDominio";
+import { TipoTransaccion } from '../../../Domain/enums/TipoTransaccion';
+import { EstadoTransaccion } from '../../../Domain/enums/EstadoTransaccion';
 import { PostgresConnection } from '../PostgresConnection';
 import { TransaccionQueries } from '../Queries/TransaccionQuerie';
 
@@ -13,6 +14,10 @@ interface FilaTransaccion {
     estado: EstadoTransaccion;
     descripcion?: string;
     id_cajero?: number;
+    referencia_externa?: string;
+    idempotency_key?: string;
+    estado_detalle?: string;
+    updated_at?: Date;
 }
 
 export class TransaccionRepositoryPostgres implements ITransaccionRepository {
@@ -27,6 +32,10 @@ export class TransaccionRepositoryPostgres implements ITransaccionRepository {
                 transaccion.obtenerEstado(),
                 transaccion.obtenerDescripcion(),
                 transaccion.obtenerIdCajero(),
+                transaccion.obtenerReferenciaExterna(),
+                transaccion.obtenerIdempotencyKey(),
+                transaccion.obtenerEstadoDetalle(),
+                transaccion.obtenerUpdatedAt(),
             ],
         );
 
@@ -39,6 +48,10 @@ export class TransaccionRepositoryPostgres implements ITransaccionRepository {
             estado: fila.estado,
             ...(fila.descripcion === undefined ? {} : { descripcion: fila.descripcion }),
             ...(fila.id_cajero === undefined ? {} : { idCajero: fila.id_cajero }),
+            ...(fila.referencia_externa === undefined ? {} : { referenciaExterna: fila.referencia_externa }),
+            ...(fila.idempotency_key === undefined ? {} : { idempotencyKey: fila.idempotency_key }),
+            ...(fila.estado_detalle === undefined ? {} : { estadoDetalle: fila.estado_detalle }),
+            ...(fila.updated_at === undefined ? {} : { updatedAt: fila.updated_at }),
         } as Parameters<typeof Transaccion.reconstruir>[0];
 
         return Transaccion.reconstruir(datosRebuild);

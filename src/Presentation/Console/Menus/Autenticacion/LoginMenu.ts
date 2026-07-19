@@ -1,102 +1,99 @@
+// Presentation/Console/Menus/Autenticacion/LoginMenu.ts
 import * as readline from "readline";
-import { BancoService } from "../../../Application/services/BancoService";
-import { Usuario } from "../../../Application/models/Usuario";
-import { Consola } from "../../../shared/utils/Consola";
+import { NumeroCuenta } from "../../../../Domain/Value-Objects/NumeroCuenta";
+import { Consola } from "../../../../shared/utils/Consola";
+import { autenticacionService } from "../../../../Application/services/AutenticationService";
+import { ResultadoOperacion } from "../../../../Application/models/Resultado";
+
+export interface SesionAutenticada {
+    numeroTarjeta: string;
+    numeroCuenta: string | NumeroCuenta;
+    saldo: number;
+}
 
 export class LoginMenu {
 
     constructor(
-        private bancoService: BancoService,
         private consola: readline.Interface
     ) {}
 
     public iniciar(
-        callback: (usuario: Usuario) => void
+        onLoginExitoso: (sesion: SesionAutenticada) => void
     ): void {
 
-        Consola.limpiar();
-        Consola.titulo("CAJERO AUTOMÁTICO");
-
-        this.pedirTarjeta(callback);
+        this.pedirTarjeta(onLoginExitoso);
 
     }
 
     private pedirTarjeta(
-        callback: (usuario: Usuario) => void
+        onLoginExitoso: (sesion: SesionAutenticada) => void
     ): void {
 
+        Consola.limpiar();
+
         this.consola.question(
-
-            "Ingrese el número de la tarjeta: ",
-
+            "Número de tarjeta: ",
             (numeroTarjeta: string) => {
 
-                const usuario = this.bancoService.buscarPorTarjeta(
-                    numeroTarjeta
-                );
-
-                if (!usuario) {
-
-                    Consola.error("Tarjeta no encontrada.");
-
-                    return this.reintentar(callback);
-
-                }
-
                 this.pedirPin(
-                    usuario,
-                    callback
+                    numeroTarjeta.trim(),
+                    onLoginExitoso
                 );
 
             }
-
         );
 
     }
 
     private pedirPin(
-        usuario: Usuario,
-        callback: (usuario: Usuario) => void
+        numeroTarjeta: string,
+        onLoginExitoso: (sesion: SesionAutenticada) => void
     ): void {
 
         this.consola.question(
+            "PIN: ",
+            async (pin: string) => {
 
-            "Ingrese su PIN: ",
-
-            (pin: string) => {
-
-                const valido = this.bancoService.validarPin(
-                    usuario,
-                    pin
+                await this.autenticar(
+                    numeroTarjeta,
+                    pin.trim(),
+                    onLoginExitoso
                 );
 
-                if (!valido) {
-
-                    Consola.error("PIN incorrecto.");
-
-                    return this.reintentar(callback);
-
-                }
-
-                callback(usuario);
-
             }
-
         );
 
     }
 
-    private reintentar(
-        callback: (usuario: Usuario) => void
-    ): void {
+    private async autenticar(
+        numeroTarjeta: string,
+        pin: string,
+        onLoginExitoso: (sesion: SesionAutenticada) => void
+    ): Promise<void> {
 
-        this.consola.question(
-
-            "\nPresione ENTER para continuar...",
-
-            () => this.iniciar(callback)
-
+        const resultado = await autenticacionService.autenticar(
+            numeroTarjeta,
+            pin
         );
+
+        if (!resultado.estado) {
+
+            Consola.error(ResultadoOperacion.obtenerMensajeError(resultado));
+
+            this.consola.question(
+                "\nPresione ENTER para reintentar...",
+                () => this.pedirTarjeta(onLoginExitoso)
+            );
+
+            return;
+
+        }
+
+        onLoginExitoso({
+            numeroTarjeta: resultado.valor.numeroTarjeta,
+            numeroCuenta: resultado.valor.numeroCuenta,
+            saldo: resultado.valor.saldo
+        });
 
     }
 

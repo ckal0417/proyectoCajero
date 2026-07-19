@@ -1,7 +1,7 @@
 import { Evento } from "../../shared/events/Evento";
 import { IEventSubscriber } from "../../Application/interfaces/IEventSubscriber";
-import { TransaccionRepository } from "../../Infrastructure/repositories/TransaccionRepository";
 import { Transaccion } from "../../Domain/Entities/Transaccion";
+import { TransaccionRepository } from "../../Infrastructure/Database/Repositories/TransaccionRepository";
 
 export class HistorialSubscriber implements IEventSubscriber<Transaccion> {
     constructor(

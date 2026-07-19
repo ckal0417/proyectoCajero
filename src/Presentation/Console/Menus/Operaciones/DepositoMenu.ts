@@ -1,13 +1,13 @@
 import * as readline from "readline";
-import { CajeroService } from "../../../Application/services/CajeroService";
-import { Cuenta } from "../../../Application/models/Cuenta";
-import { Consola } from "../../../shared/utils/Consola";
+import { operacionesBancariasService } from "../../../../Application/services/OperacionesBancariasService";
+import { Consola } from "../../../../shared/utils/Consola";
+import { Formato } from "../../../../shared/utils/Formato";
+import { ResultadoOperacion } from "../../../../Application/models/Resultado";
 
 export class DepositoMenu {
 
     constructor(
-        private cuenta: Cuenta,
-        private cajeroService: CajeroService,
+        private numeroTarjeta: string,
         private consola: readline.Interface
     ) {}
 
@@ -20,19 +20,22 @@ export class DepositoMenu {
 
             "Ingrese el monto: ",
 
-            (texto: string) => {
+            async (texto: string) => {
 
                 const monto = Number(texto);
 
-                this.cajeroService.ejecutar(
-
-                    "depositar",
-
-                    this.cuenta,
-
+                const resultado = await operacionesBancariasService.depositar({
+                    numeroTarjeta: this.numeroTarjeta,
                     monto
+                });
 
-                );
+                if (resultado.estado) {
+                    const body = resultado.valor.body as { mensaje: string; nuevoSaldo: number };
+                    Consola.exito(body.mensaje);
+                    Consola.informacion(`Saldo actual: ${Formato.dinero(body.nuevoSaldo)}`);
+                } else {
+                    Consola.error(ResultadoOperacion.obtenerMensajeError(resultado));
+                }
 
                 this.consola.question(
 

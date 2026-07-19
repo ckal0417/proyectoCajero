@@ -25,6 +25,26 @@ async function ensureOperationalTables(client: Client): Promise<void> {
         CREATE INDEX IF NOT EXISTS idx_idempotencia_lookup
         ON BancoFuego.IdempotenciaOperacion(numero_tarjeta, endpoint, idempotency_key);
     `);
+
+    await client.query(`
+        ALTER TABLE BancoFuego.Transaccion
+            ADD COLUMN IF NOT EXISTS referencia_externa VARCHAR(120);
+    `);
+
+    await client.query(`
+        ALTER TABLE BancoFuego.Transaccion
+            ADD COLUMN IF NOT EXISTS idempotency_key VARCHAR(100);
+    `);
+
+    await client.query(`
+        ALTER TABLE BancoFuego.Transaccion
+            ADD COLUMN IF NOT EXISTS estado_detalle TEXT;
+    `);
+
+    await client.query(`
+        ALTER TABLE BancoFuego.Transaccion
+            ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+    `);
 }
 
 export async function runMigrations() {
@@ -42,7 +62,7 @@ export async function runMigrations() {
         const checkResult = await client.query(`
             SELECT EXISTS (
                 SELECT 1 FROM information_schema.tables 
-                WHERE table_schema = 'BancoFuego' AND table_name = 'banco'
+                WHERE table_schema = 'bancofuego' AND table_name = 'banco'
             ) as exists
         `);
 
@@ -75,10 +95,19 @@ export async function runMigrations() {
         // Si el error es por "ya existe", no es crítico en desarrollo
         if (errorMsg.includes('ya existe') || errorMsg.includes('already exists')) {
             console.log('⚠️  Tablas o tipos ya existen. Continuando...');
+            await ensureOperationalTables(client);
         } else {
             throw error;
         }
     } finally {
         await client.end();
     }
+}
+
+if (require.main === module) {
+    runMigrations().catch((error) => {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error('❌ Migración abortada:', errorMsg);
+        process.exit(1);
+    });
 }

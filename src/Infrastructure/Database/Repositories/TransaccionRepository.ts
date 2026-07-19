@@ -1,7 +1,7 @@
-import { Transaccion as TransaccionApp } from '../../Application/models/Transaccion';
-import { Transaccion as TransaccionDomain } from '../../Domain/Entities/Transaccion';
+import { Transaccion } from "../../../Domain/Entities/Transaccion";
 
-type TransaccionCompat = TransaccionApp | TransaccionDomain;
+
+type TransaccionCompat = Transaccion;
 
 export class TransaccionRepository {
     private readonly transacciones: TransaccionCompat[] = [];

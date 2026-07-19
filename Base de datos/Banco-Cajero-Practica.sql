@@ -7,11 +7,12 @@ SET search_path TO BancoFuego;
 CREATE TABLE BancoFuego.Banco(
 
     id_banco SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
     codigo VARCHAR(20) NOT NULL UNIQUE,
+    nombre VARCHAR(100) NOT NULL,
     direccion VARCHAR(200),
-    activo BOOLEAN DEFAULT TRUE
-
+    activo BOOLEAN DEFAULT TRUE,
+    update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Se crea la tabla cliente, que tiene una relacion con la tabla de cuenta
@@ -94,9 +95,9 @@ CREATE TABLE BancoFuego.Cajero(
 
 
 -- Se crea un enun para el tipo de transaccion, puede ser deposito, retiro o transferencia
-CREATE TYPE tipo_transaccion AS ENUM ('DEPOSITO', 'RETIRO', 'TRANSFERENCIA');
+CREATE TYPE tipo_transaccion AS ENUM ('DEPOSITO', 'RETIRO', 'TRANSFERENCIA_INTERNA', 'TRANSFERENCIA_EXTERNA');
 -- Se crea un enun para el estado de la transaccion, puede ser exitosa, fallida o cancelada
-CREATE TYPE estado_transaccion AS ENUM ('EXITOSA', 'FALLIDA', 'CANCELADA');
+CREATE TYPE estado_transaccion AS ENUM ('EXITOSA', 'FALLIDA', 'CANCELADA', 'PENDIENTE');
 -- Se crea la tabla de transaccion, que tiene una relacion con la tabla de cajero
 CREATE TABLE BancoFuego.Transaccion(
 
@@ -106,6 +107,10 @@ CREATE TABLE BancoFuego.Transaccion(
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     estado estado_transaccion DEFAULT 'EXITOSA',
     descripcion TEXT,
+    referencia_externa VARCHAR(120),
+    idempotency_key VARCHAR(100),
+    estado_detalle TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_cajero INTEGER,
 
     CONSTRAINT chk_monto CHECK(monto > 0),
@@ -116,13 +121,13 @@ CREATE TABLE BancoFuego.Transaccion(
 
 );
 
--- Se crea un enun para el tipo de movimiento, puede ser deposito, retiro o transferencia
-CREATE TYPE tipo_movimiento AS ENUM ('DEPOSITO', 'RETIRO', 'TRANSFERENCIA');
+-- Se crea un enun para la naturaleza del movimiento, puede ser credito o debito
+CREATE TYPE naturaleza_movimiento AS ENUM ('CREDITO', 'DEBITO');
 -- Se crea la tabla de movimiento, que tiene una relacion con la tabla de cuenta y transaccion
 CREATE TABLE BancoFuego.Movimiento(
 
     id_movimiento SERIAL PRIMARY KEY,
-    tipo tipo_movimiento NOT NULL, -- Se usa el enun Tipo_movimiento para definir el tipo de movimiento
+    naturaleza naturaleza_movimiento NOT NULL,
     monto NUMERIC(15,2) NOT NULL,
     saldo_anterior NUMERIC(15,2) NOT NULL,
     saldo_nuevo NUMERIC(15,2) NOT NULL,
@@ -204,7 +209,9 @@ ON BancoFuego.IdempotenciaOperacion(numero_tarjeta, endpoint, idempotency_key);
 
 INSERT INTO Banco(nombre, codigo, direccion)
 VALUES
-('Banco Fuego', 'BF001', 'Av. Amazonas y Naciones Unidas');
+('Banco Fuego', 'BF001', 'Av. Amazonas y Naciones Unidas'), 
+('Banco Chanchito', 'BS002', 'Av. 10 de Agosto y Patria');
+
 
 --------------------------------------------------
 -- CLIENTES

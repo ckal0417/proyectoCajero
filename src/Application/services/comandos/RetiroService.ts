@@ -1,9 +1,12 @@
-import { Resultado, ResultadoOperacion } from "../../models/Resultado";
-import { CuentaRepository } from "../../../Infrastructure/repositories/CuentaRepository";
+
 import { EventBus } from "../../../shared/events/EventBus";
 import { TiposEvento } from "../../../shared/events/TiposEvento";
-import { Transaccion } from "../../models/Transaccion";
+import { Transaccion } from "../../../Domain/Entities/Transaccion";
 import { TipoTransaccion } from "../../../Domain/enums/TipoTransaccion";
+import { CuentaRepository } from "../../../Infrastructure/Database/Repositories/CuentaRepository";
+import { Resultado, ResultadoOperacion } from "../../models/Resultado";
+import { Dinero } from "../../../Domain/Value-Objects/Dinero";
+import { EstadoTransaccion } from "../../../Domain/enums/EstadoTransaccion";
 
 export class RetiroService {
     constructor(
@@ -29,12 +32,12 @@ export class RetiroService {
             cuenta.obtenerSaldo()
         );
 
-        const transaccion = new Transaccion(
-            TipoTransaccion.RETIRO,
-            monto,
-            new Date(),
-            "Retiro realizado"
-        );
+        const transaccion = Transaccion.crear({
+            tipo: TipoTransaccion.RETIRO,
+            monto: Dinero.desde(monto),
+            estado: EstadoTransaccion.EXITOSA,
+            descripcion: "Retiro realizado",
+        });
 
         this.eventBus.publicar({
             nombre: TiposEvento.RETIRO_REALIZADO,

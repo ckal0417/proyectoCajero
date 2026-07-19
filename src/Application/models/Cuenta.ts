@@ -1,4 +1,4 @@
-import { TipoCuenta } from "../Domain/enums/TipoCuenta";
+import { TipoCuenta } from "../../Domain/enums/TipoCuenta";
 
 export class Cuenta {
 

@@ -1,5 +1,5 @@
 import { ICommand } from "../Interfaces/ICommand";
-import { Consola } from "../../../utils/Consola";
+import { Consola } from "../../../shared/utils/Consola";
 import { HistorialService } from "../../../Application/services/comandos/HistorialService";
 
 export class HistorialCommand implements ICommand {
@@ -24,7 +24,7 @@ export class HistorialCommand implements ICommand {
             return;
         }
 
-        resultado.valor.forEach(transaccion => {
+        resultado.valor.forEach((transaccion: { mostrar: () => string; }) => {
             Consola.informacion(
                 transaccion.mostrar()
             );

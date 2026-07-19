@@ -1,12 +1,15 @@
-import { Resultado, ResultadoOperacion } from "../../../models/Resultado";
-import { CuentaRepository } from "../../../../Infrastructure/repositories/CuentaRepository";
+
 import { TransferenciaLocalService } from "./local/TransferenciaLocalService";
 import { TransferenciaInterbancariaService } from "./interbancaria/TransferenciaInterbancariaService";
 import { EventBus } from "../../../../shared/events/EventBus";
 import { TiposEvento } from "../../../../shared/events/TiposEvento";
-import { Transaccion } from "../../../models/Transaccion";
 import { TipoTransaccion } from "../../../../Domain/enums/TipoTransaccion";
 import { TransferenciaValidacion } from "../../../../shared/utils/validaciones/TransferenciaValidacion";
+import { CuentaRepository } from "../../../../Infrastructure/Database/Repositories/CuentaRepository";
+import { Transaccion } from "../../../../Domain/Entities/Transaccion";
+import { Resultado, ResultadoOperacion } from "../../../models/Resultado";
+import { Dinero } from "../../../../Domain/Value-Objects/Dinero";
+import { EstadoTransaccion } from "../../../../Domain/enums/EstadoTransaccion";
 
 export class TransferenciaService {
 
@@ -84,12 +87,12 @@ export class TransferenciaService {
             cuentaDestino.obtenerSaldo()
         );
 
-        const transaccion = new Transaccion(
-            TipoTransaccion.TRANSFERENCIA,
-            montoTransferencia,
-            new Date(),
-            `Transferencia local a la cuenta ${numeroCuentaDestino}`
-        );
+        const transaccion = Transaccion.crear({
+            tipo: TipoTransaccion.TRANSFERENCIA_INTERNA,
+            monto: Dinero.desde(montoTransferencia),
+            estado: EstadoTransaccion.EXITOSA,
+            descripcion: `Transferencia local a la cuenta ${numeroCuentaDestino}`,
+        });
 
         this.eventBus.publicar({
             nombre: TiposEvento.TRANSFERENCIA_REALIZADA,
@@ -159,12 +162,12 @@ export class TransferenciaService {
             cuentaOrigen.obtenerSaldo()
         );
 
-        const transaccion = new Transaccion(
-            TipoTransaccion.TRANSFERENCIA,
-            montoTransferencia,
-            new Date(),
-            `Transferencia interbancaria a ${bancoDestino}, cuenta ${numeroCuentaDestino}`
-        );
+        const transaccion = Transaccion.crear({
+            tipo: TipoTransaccion.TRANSFERENCIA_INTERBANCARIA,
+            monto: Dinero.desde(montoTransferencia),
+            estado: EstadoTransaccion.EXITOSA,
+            descripcion: `Transferencia interbancaria a ${bancoDestino}, cuenta ${numeroCuentaDestino}`,
+        });
 
         this.eventBus.publicar({
             nombre: TiposEvento.TRANSFERENCIA_REALIZADA,

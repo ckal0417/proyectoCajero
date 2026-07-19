@@ -2,10 +2,14 @@ import 'dotenv/config';
 import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import * as readline from 'readline';
 import { runMigrations } from './Infrastructure/Database/migrate';
 import routes from './Presentation/Http/routes';
 import swaggerRouter from './Presentation/Http/swagger';
 import logger from './shared/Logger';
+import { MainMenu } from './Presentation/Console/Menus/MainMenu';
+
+const APP_MODE = process.env.APP_MODE ?? 'console';
 
 const app: Express = express();
 const port = Number(process.env.PORT ?? 3000);
@@ -40,6 +44,7 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
+
 async function iniciarAplicacion() {
     try {
         logger.info('📋 Ejecutando migraciones de base de datos...');
@@ -56,4 +61,20 @@ async function iniciarAplicacion() {
     }
 }
 
-iniciarAplicacion();
+function iniciarConsola(): void {
+    const consola = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    const mainMenu = new MainMenu(consola);
+    mainMenu.iniciar();
+}
+
+
+if (APP_MODE === 'console') {
+    iniciarConsola();
+} 
+else {
+    iniciarAplicacion();
+}

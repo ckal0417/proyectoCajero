@@ -1,4 +1,4 @@
-import { Usuario } from '../../Application/models/Usuario';
+import { Usuario } from "../../../Application/models/Usuario";
 
 export class UsuarioRepository {
     constructor(private readonly usuarios: Usuario[] = []) {}

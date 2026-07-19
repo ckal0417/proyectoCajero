@@ -6,6 +6,8 @@
     "start": "ts-node src/index.ts",
     "build": "tsc",
     "dev": "ts-node src/index.ts",
+    "console": "cross-env APP_MODE=console ts-node src/index.ts",
+    "start:http": "cross-env APP_MODE=http ts-node src/index.ts",
     "migrate": "ts-node src/Infrastructure/Database/migrate.ts",
     "reset-db": "node reset-db.js && echo '✅ BD limpia'"
   },
@@ -27,6 +29,7 @@
     "@types/pg": "^8.20.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "cross-env": "^10.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
   },

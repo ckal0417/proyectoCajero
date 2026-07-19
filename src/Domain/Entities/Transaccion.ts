@@ -1,7 +1,7 @@
 // Entities/Transaccion.ts
-import { TipoTransaccion, EstadoTransaccion } from "../enums/TiposDominio";
+import { TipoTransaccion } from "../enums/TipoTransaccion";
+import { EstadoTransaccion } from "../enums/EstadoTransaccion";
 import { Dinero } from "../Value-Objects/Dinero";
-import { OperacionNoSoportadaError } from "../../shared/Errors";
 
 export class Transaccion {
 
@@ -13,6 +13,10 @@ export class Transaccion {
         private readonly estado: EstadoTransaccion,
         private readonly descripcion: string | undefined,
         private readonly idCajero: number | undefined,
+        private readonly referenciaExterna: string | undefined,
+        private readonly idempotencyKey: string | undefined,
+        private readonly estadoDetalle: string | undefined,
+        private readonly updatedAt: Date,
     ) {}
 
     static crear(datos: {
@@ -21,11 +25,11 @@ export class Transaccion {
         estado: EstadoTransaccion;
         descripcion?: string;
         idCajero?: number;
+        referenciaExterna?: string;
+        idempotencyKey?: string;
+        estadoDetalle?: string;
+        updatedAt?: Date;
     }): Transaccion {
-
-        if (datos.tipo === 'TRANSFERENCIAINTERBANCARIA') {
-            throw new OperacionNoSoportadaError('Las transferencias interbancarias aún no están soportadas');
-        }
         return new Transaccion(
             undefined,
             datos.tipo,
@@ -34,6 +38,10 @@ export class Transaccion {
             datos.estado,
             datos.descripcion,
             datos.idCajero,
+            datos.referenciaExterna,
+            datos.idempotencyKey,
+            datos.estadoDetalle,
+            datos.updatedAt ?? new Date(),
         );
     }
 
@@ -45,6 +53,10 @@ export class Transaccion {
         estado: EstadoTransaccion;
         descripcion?: string;
         idCajero?: number;
+        referenciaExterna?: string;
+        idempotencyKey?: string;
+        estadoDetalle?: string;
+        updatedAt?: Date;
     }): Transaccion {
         return new Transaccion(
             datos.id,
@@ -54,15 +66,19 @@ export class Transaccion {
             datos.estado,
             datos.descripcion,
             datos.idCajero,
+            datos.referenciaExterna,
+            datos.idempotencyKey,
+            datos.estadoDetalle,
+            datos.updatedAt ?? datos.fecha,
         );
     }
 
     esExitosa(): boolean {
-        return this.estado === 'EXITOSA';
+        return this.estado === EstadoTransaccion.EXITOSA;
     }
 
     esFallida(): boolean {
-        return this.estado === 'FALLIDA';
+        return this.estado === EstadoTransaccion.FALLIDA;
     }
 
     obtenerId(): number | undefined {
@@ -87,5 +103,21 @@ export class Transaccion {
 
     obtenerIdCajero(): number | undefined {
         return this.idCajero;
+    }
+
+    obtenerReferenciaExterna(): string | undefined {
+        return this.referenciaExterna;
+    }
+
+    obtenerIdempotencyKey(): string | undefined {
+        return this.idempotencyKey;
+    }
+
+    obtenerEstadoDetalle(): string | undefined {
+        return this.estadoDetalle;
+    }
+
+    obtenerUpdatedAt(): Date {
+        return this.updatedAt;
     }
 }
