@@ -1,4 +1,5 @@
 import { EventBus } from "../../shared/events/EventBus";
+import { ITransaccionStore } from "../../Application/Ports/ITransaccionStore";
 import { Evento } from "../../shared/events/Evento";
 import { TiposEvento } from "../../shared/events/TiposEvento";
 import { Transaccion } from "../../Domain/Entities/Transaccion";
@@ -10,7 +11,7 @@ export class SubscriberFactory {
 
     public static crear(
         eventBus: EventBus,
-        transaccionRepository: any // Flexible: acepta TransaccionRepository o TransaccionRepositoryPostgres
+        transaccionRepository: ITransaccionStore
     ): void {
 
         const historialSubscriber =

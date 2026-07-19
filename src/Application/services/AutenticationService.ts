@@ -1,9 +1,9 @@
 // Application/services/AutenticacionService.ts
-import { TarjetaRepositoryPostgres } from '../../Infrastructure/Database/Repositories/TarjetaRepositoryPostgres';
-import { AutenticacionRepositoryPostgres } from '../../Infrastructure/Database/Repositories/AutenticacionRepositoryPostgres';
-import { CuentaRepositoryPostgres } from '../../Infrastructure/Database/Repositories/CuentaRepositoryPostgres';
-import { PinHasherBcrypt } from '../../Infrastructure/Persistence/PinHasherBcrypt';
+import { IAutenticacionRepository } from '../Ports/IAutenticacionRepository';
+import { ICuentaRepository } from '../Ports/ICuentaRepository';
+import { ITarjetaRepository } from '../Ports/ITarjetaRepository';
 import { NumeroTarjeta } from '../../Domain/Value-Objects/NumeroTarjeta';
+import { IPinHasher } from '../../Domain/Value-Objects/PinHasher';
 import { PinTextoPlano } from '../../Domain/Value-Objects/Pin';
 import logger from '../../shared/Logger';
 import { NumeroCuenta } from '../../Domain/Value-Objects/NumeroCuenta';
@@ -18,10 +18,12 @@ export interface DatosAutenticacion {
 }
 
 export class AutenticacionService {
-    private readonly tarjetaRepository = new TarjetaRepositoryPostgres();
-    private readonly autenticacionRepository = new AutenticacionRepositoryPostgres();
-    private readonly cuentaRepository = new CuentaRepositoryPostgres();
-    private readonly pinHasher = new PinHasherBcrypt();
+    constructor(
+        private readonly tarjetaRepository: ITarjetaRepository,
+        private readonly autenticacionRepository: IAutenticacionRepository,
+        private readonly cuentaRepository: ICuentaRepository,
+        private readonly pinHasher: IPinHasher,
+    ) {}
 
     async autenticar(numeroTarjeta: string, pin: string): Promise<Resultado<DatosAutenticacion>> {
         try {
@@ -73,5 +75,3 @@ export class AutenticacionService {
         }
     }
 }
-
-export const autenticacionService = new AutenticacionService();

@@ -1,8 +1,8 @@
 // Presentation/Console/Menus/Autenticacion/LoginMenu.ts
 import * as readline from "readline";
 import { NumeroCuenta } from "../../../../Domain/Value-Objects/NumeroCuenta";
+import { autenticacionService } from "../../../../bootstrap/services";
 import { Consola } from "../../../../shared/utils/Consola";
-import { autenticacionService } from "../../../../Application/services/AutenticationService";
 import { ResultadoOperacion } from "../../../../Application/models/Resultado";
 
 export interface SesionAutenticada {

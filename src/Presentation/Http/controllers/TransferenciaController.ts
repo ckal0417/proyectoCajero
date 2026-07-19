@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/AuthMiddleware';
-import { operacionesBancariasService } from '../../../Application/services/OperacionesBancariasService';
 import { ResultadoOperacion } from '../../../Application/models/Resultado';
+import { operacionesBancariasService } from '../../../Application/services/OperacionesBancariasService';
 
 export class TransferenciaController {
     async transferir(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -13,6 +13,8 @@ export class TransferenciaController {
         const resultado = await operacionesBancariasService.transferir({
             numeroTarjeta: authReq.numeroTarjeta,
             idempotencyKey,
+            tipoTransferencia: authReq.body?.tipoTransferencia,
+            bancoDestino: authReq.body?.bancoDestino,
             numeroCuentaDestino: authReq.body?.numeroCuentaDestino,
             monto: authReq.body?.monto,
         });
@@ -23,7 +25,6 @@ export class TransferenciaController {
             });
             return;
         }
-
         const body =
             authReq.nombreCliente && typeof resultado.valor.body === 'object' && resultado.valor.body !== null
                 ? {

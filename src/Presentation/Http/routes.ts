@@ -151,6 +151,13 @@ router.post('/operaciones/retirar', verificarToken, (req, res, next) => {
  *           schema:
  *             type: object
  *             properties:
+ *               tipoTransferencia:
+ *                 type: string
+ *                 enum: [INTERNA, EXTERNA]
+ *                 example: INTERNA
+ *               bancoDestino:
+ *                 type: string
+ *                 example: BancoExterno
  *               numeroCuentaDestino:
  *                 type: string
  *                 example: "2200000002"

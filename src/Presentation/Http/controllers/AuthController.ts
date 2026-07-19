@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest, generarToken } from '../middleware/AuthMiddleware';
 import logger from '../../../shared/Logger';
-import { autenticacionService } from '../../../Application/services/AutenticationService';
+import { autenticacionService } from '../../../bootstrap/services';
 import { ResultadoOperacion } from '../../../Application/models/Resultado';
 
 /**
