@@ -8,8 +8,9 @@ import routes from './Presentation/Http/routes';
 import swaggerRouter from './Presentation/Http/swagger';
 import logger from './shared/Logger';
 import { MainMenu } from './Presentation/Console/Menus/MainMenu';
+import { transferenciaExternaPollingWorker } from './bootstrap/services';
 
-const APP_MODE = process.env.APP_MODE ?? 'console';
+const APP_MODE = process.env.APP_MODE ?? 'http';
 
 const app: Express = express();
 const port = Number(process.env.PORT ?? 3000);
@@ -54,6 +55,11 @@ async function iniciarAplicacion() {
         app.listen(port, () => {
             logger.info(`🚀 Servidor ejecutándose en http://localhost:${port}`);
             logger.info(`📚 Documentación en http://localhost:${port}/docs`);
+
+            const pollingHabilitado = (process.env.TRANSFERENCIA_EXTERNA_POLL_ENABLED ?? 'true') === 'true';
+            if (pollingHabilitado) {
+                transferenciaExternaPollingWorker.iniciar();
+            }
         });
     } catch (error) {
         logger.error('❌ Error iniciando aplicación:', error);

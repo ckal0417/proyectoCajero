@@ -9,7 +9,8 @@
     "console": "cross-env APP_MODE=console ts-node src/index.ts",
     "start:http": "cross-env APP_MODE=http ts-node src/index.ts",
     "migrate": "ts-node src/Infrastructure/Database/migrate.ts",
-    "reset-db": "node reset-db.js && echo '✅ BD limpia'"
+    "reset-db": "node reset-db.js && echo '✅ BD limpia'",
+    "smoke:red-bancaria": "ts-node src/Infrastructure/External/RedBancariaHttpClient.smoke.ts"
   },
   "repository": {
     "type": "git",

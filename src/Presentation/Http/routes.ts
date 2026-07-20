@@ -178,6 +178,32 @@ router.post('/operaciones/transferir', verificarToken, (req, res, next) => {
 
 /**
  * @swagger
+ * /operaciones/transferencias/{referencia}/estado:
+ *   get:
+ *     summary: Consulta el estado de una transferencia interbancaria externa
+ *     tags: [Operaciones]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: referencia
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Estado consultado
+ *       404:
+ *         description: Transferencia no encontrada
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/operaciones/transferencias/:referencia/estado', verificarToken, (req, res) => {
+    transferenciaController.consultarEstado(req, res);
+});
+
+/**
+ * @swagger
  * /operaciones/historial:
  *   get:
  *     summary: Obtiene el historial de transacciones

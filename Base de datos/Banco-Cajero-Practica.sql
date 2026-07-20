@@ -108,6 +108,8 @@ CREATE TABLE BancoFuego.Transaccion(
     estado estado_transaccion DEFAULT 'EXITOSA',
     descripcion TEXT,
     referencia_externa VARCHAR(120),
+    numero_tarjeta_origen VARCHAR(20),
+    id_cuenta_origen INTEGER,
     idempotency_key VARCHAR(100),
     estado_detalle TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -197,6 +199,12 @@ ON BancoFuego.Movimiento(fecha);
 
 CREATE INDEX idx_transaccion_fecha
 ON BancoFuego.Transaccion(fecha);
+
+CREATE INDEX idx_transaccion_externa_ref_owner
+ON BancoFuego.Transaccion(tipo, referencia_externa, numero_tarjeta_origen);
+
+CREATE INDEX idx_transaccion_externa_pendiente
+ON BancoFuego.Transaccion(tipo, estado, updated_at);
 
 CREATE INDEX idx_idempotencia_lookup
 ON BancoFuego.IdempotenciaOperacion(numero_tarjeta, endpoint, idempotency_key);

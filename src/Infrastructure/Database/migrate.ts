@@ -45,6 +45,26 @@ async function ensureOperationalTables(client: Client): Promise<void> {
         ALTER TABLE BancoFuego.Transaccion
             ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
     `);
+
+    await client.query(`
+        ALTER TABLE BancoFuego.Transaccion
+            ADD COLUMN IF NOT EXISTS numero_tarjeta_origen VARCHAR(20);
+    `);
+
+    await client.query(`
+        ALTER TABLE BancoFuego.Transaccion
+            ADD COLUMN IF NOT EXISTS id_cuenta_origen INTEGER;
+    `);
+
+    await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_transaccion_externa_ref_owner
+        ON BancoFuego.Transaccion(tipo, referencia_externa, numero_tarjeta_origen);
+    `);
+
+    await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_transaccion_externa_pendiente
+        ON BancoFuego.Transaccion(tipo, estado, updated_at);
+    `);
 }
 
 export async function runMigrations() {
@@ -76,7 +96,7 @@ export async function runMigrations() {
 
         console.log('📋 Creando esquema y tablas...');
         const sql = readFileSync(path.resolve(__dirname, '../../../Base De Datos/Banco-Cajero-Practica.sql'), 'utf8');
-        
+
         // Ejecutar el SQL completo en una transacción
         await client.query('BEGIN');
         try {
@@ -91,7 +111,7 @@ export async function runMigrations() {
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('❌ Error en migraciones:', errorMsg);
-        
+
         // Si el error es por "ya existe", no es crítico en desarrollo
         if (errorMsg.includes('ya existe') || errorMsg.includes('already exists')) {
             console.log('⚠️  Tablas o tipos ya existen. Continuando...');

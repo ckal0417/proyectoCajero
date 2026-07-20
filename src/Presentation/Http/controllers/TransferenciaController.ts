@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 import { ResultadoOperacion } from '../../../Application/models/Resultado';
-import { operacionesBancariasService } from '../../../bootstrap/services';
+import { operacionesBancariasService, transferenciaExternaEstadoService } from '../../../bootstrap/services';
 
 export class TransferenciaController {
     async transferir(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -36,5 +36,29 @@ export class TransferenciaController {
                 : resultado.valor.body;
 
         res.status(resultado.valor.status).json(body);
+    }
+
+    async consultarEstado(req: Request, res: Response): Promise<void> {
+        const authReq = req as AuthRequest;
+        const numeroTarjeta = String(authReq.numeroTarjeta ?? '').trim();
+        if (!numeroTarjeta) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        const referencia = String(req.params.referencia ?? '').trim();
+        const resultado = await transferenciaExternaEstadoService.consultarEstadoPorReferencia(
+            referencia,
+            numeroTarjeta,
+        );
+
+        if (!resultado.estado) {
+            res.status(ResultadoOperacion.obtenerStatusError(resultado, 400)).json({
+                error: ResultadoOperacion.obtenerMensajeError(resultado),
+            });
+            return;
+        }
+
+        res.status(resultado.valor.status).json(resultado.valor.body);
     }
 }

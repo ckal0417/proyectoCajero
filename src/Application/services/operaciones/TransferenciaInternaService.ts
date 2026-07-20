@@ -1,5 +1,9 @@
 import { Pool } from 'pg';
 import logger from '../../../shared/Logger';
+import { Dinero } from '../../../Domain/Value-Objects/Dinero';
+import { EventBus } from '../../../shared/events/EventBus';
+import { TiposEvento } from '../../../shared/events/TiposEvento';
+import { IRedBancariaClient, ResultadoTransferenciaInterbancaria } from '../../Ports/IRedBancariaClient';
 import { Resultado, ResultadoOperacion } from '../../models/Resultado';
 import { CuentaOperacionQueryService } from './CuentaOperacionQueryService';
 import { IdempotenciaService } from './IdempotenciaService';
@@ -14,6 +18,8 @@ export class TransferenciaOperacionService {
         private readonly pool: Pool,
         private readonly cuentaQueryService: CuentaOperacionQueryService,
         private readonly idempotenciaService: IdempotenciaService,
+        private readonly redBancariaClient: IRedBancariaClient,
+        private readonly eventBus: EventBus,
     ) { }
 
     async ejecutar(args: {
@@ -92,18 +98,12 @@ export class TransferenciaOperacionService {
                 return this.fallido('Cuenta origen no encontrada', 404);
             }
 
-            const idCuentaDestino = await this.cuentaQueryService.obtenerIdCuentaPorNumeroTx(client, numeroCuentaDestino);
-            if (idCuentaDestino === null) {
-                await client.query('ROLLBACK');
-                return this.fallido('Cuenta destino no encontrada', 404);
-            }
-
-            if (idCuentaOrigen === idCuentaDestino) {
-                await client.query('ROLLBACK');
-                return this.fallido('La cuenta destino debe ser distinta a la de origen', 400);
-            }
-
             if (tipoTransferencia === 'EXTERNA') {
+                if (numeroCuentaOrigen === numeroCuentaDestino) {
+                    await client.query('ROLLBACK');
+                    return this.fallido('La cuenta destino debe ser distinta a la de origen', 400);
+                }
+
                 const cuentaOrigenBloqueada = await this.cuentaQueryService.obtenerCuentaBloqueada(client, idCuentaOrigen);
                 if (!cuentaOrigenBloqueada) {
                     await client.query('ROLLBACK');
@@ -121,22 +121,96 @@ export class TransferenciaOperacionService {
                     return this.fallido('Fondos insuficientes', 400);
                 }
 
-                const referenciaExterna = `EXT-${Date.now()}`;
+                const saldoReservado = saldoAnteriorOrigen - montoNumero;
+
+                const referenciaLocal = `EXT-${Date.now()}`;
+                const transaccionExterna = await client.query<FilaTransaccion>(
+                    `
+                    INSERT INTO BancoFuego.Transaccion
+                        (tipo, monto, estado, descripcion, referencia_externa, numero_tarjeta_origen, id_cuenta_origen, estado_detalle)
+                    VALUES
+                        ('TRANSFERENCIA_EXTERNA', $1, 'PENDIENTE', $2, $3, $4, $5, $6)
+                    RETURNING id_transaccion
+                    `,
+                    [
+                        montoNumero,
+                        `Transferencia externa a ${bancoDestino}, cuenta ${numeroCuentaDestino}`,
+                        referenciaLocal,
+                        args.numeroTarjeta ?? null,
+                        idCuentaOrigen,
+                        'Reserva aplicada en cuenta origen',
+                    ],
+                );
+
+                const idTransaccionExterna = transaccionExterna.rows[0]!.id_transaccion;
 
                 await client.query(
                     `
-                    INSERT INTO BancoFuego.Transaccion
-                        (tipo, monto, estado, descripcion, referencia_externa)
-                    VALUES
-                        ('TRANSFERENCIA_EXTERNA', $1, 'PENDIENTE', $2, $3)
+                    UPDATE BancoFuego.Cuenta
+                    SET saldo = $1
+                    WHERE id_cuenta = $2
                     `,
-                    [montoNumero, `Transferencia externa a ${bancoDestino}, cuenta ${numeroCuentaDestino}`, referenciaExterna],
+                    [saldoReservado, idCuentaOrigen],
+                );
+
+                await client.query(
+                    `
+                    INSERT INTO BancoFuego.Movimiento
+                        (naturaleza, monto, saldo_anterior, saldo_nuevo, id_cuenta, id_transaccion)
+                    VALUES ('DEBITO', $1, $2, $3, $4, $5)
+                    `,
+                    [montoNumero, saldoAnteriorOrigen, saldoReservado, idCuentaOrigen, idTransaccionExterna],
+                );
+
+                const resultadoRed = await this.redBancariaClient.realizarTransferenciaInterbancaria({
+                    bancoOrigen: process.env.BANCO_ORIGEN_NOMBRE ?? 'BancoFuego',
+                    bancoDestino,
+                    numeroCuentaOrigen,
+                    numeroCuentaDestino,
+                    montoTransferencia: Dinero.desde(montoNumero),
+                    fecha: new Date(),
+                });
+
+                const resultadoPersistencia = this.mapearResultadoExterno(resultadoRed, referenciaLocal);
+                let saldoDisponible = saldoReservado;
+                let reversaAplicada = false;
+                let estadoDetalle = resultadoPersistencia.estadoDetalle;
+
+                if (resultadoPersistencia.estadoTransaccion === 'FALLIDA') {
+                    saldoDisponible = await this.aplicarReversaExternaTx({
+                        client,
+                        idCuentaOrigen,
+                        montoNumero,
+                        idTransaccionExterna,
+                        saldoActual: saldoReservado,
+                    });
+                    reversaAplicada = true;
+                    estadoDetalle = `${estadoDetalle}. Reversa aplicada en cuenta origen`;
+                }
+
+                await client.query(
+                    `
+                    UPDATE BancoFuego.Transaccion
+                    SET estado = $1,
+                        referencia_externa = $2,
+                        estado_detalle = $3,
+                        updated_at = NOW()
+                    WHERE id_transaccion = $4
+                    `,
+                    [
+                        resultadoPersistencia.estadoTransaccion,
+                        resultadoPersistencia.referenciaExterna,
+                        estadoDetalle,
+                        idTransaccionExterna,
+                    ],
                 );
 
                 const respuestaExterna = {
-                    mensaje: 'Transferencia externa registrada',
-                    estado: 'PENDIENTE',
-                    referenciaExterna,
+                    mensaje: resultadoPersistencia.mensaje,
+                    estado: resultadoPersistencia.estadoPublico,
+                    referenciaExterna: resultadoPersistencia.referenciaExterna,
+                    saldoDisponible,
+                    reversaAplicada,
                     bancoDestino,
                     numeroCuentaOrigen,
                     numeroCuentaDestino,
@@ -148,16 +222,36 @@ export class TransferenciaOperacionService {
                         args.numeroTarjeta,
                         'TRANSFERENCIA',
                         idempotencyKey,
-                        202,
+                        resultadoPersistencia.statusCode,
                         respuestaExterna,
                     );
                 }
 
                 await client.query('COMMIT');
+                this.publicarEventoTransferenciaExterna({
+                    referenciaExterna: resultadoPersistencia.referenciaExterna,
+                    estado: resultadoPersistencia.estadoPublico,
+                    numeroTarjeta: args.numeroTarjeta,
+                    numeroCuentaOrigen,
+                    numeroCuentaDestino,
+                    monto: montoNumero,
+                    reversaAplicada,
+                });
                 logger.info(
-                    `Transferencia externa registrada: $${montoNumero} desde cuenta ${numeroCuentaOrigen} a ${bancoDestino}/${numeroCuentaDestino}`,
+                    `Transferencia externa procesada: estado=${resultadoPersistencia.estadoPublico} referencia=${resultadoPersistencia.referenciaExterna}`,
                 );
-                return ResultadoOperacion.exitoso({ status: 202, body: respuestaExterna });
+                return ResultadoOperacion.exitoso({ status: resultadoPersistencia.statusCode, body: respuestaExterna });
+            }
+
+            const idCuentaDestino = await this.cuentaQueryService.obtenerIdCuentaPorNumeroTx(client, numeroCuentaDestino);
+            if (idCuentaDestino === null) {
+                await client.query('ROLLBACK');
+                return this.fallido('Cuenta destino no encontrada', 404);
+            }
+
+            if (idCuentaOrigen === idCuentaDestino) {
+                await client.query('ROLLBACK');
+                return this.fallido('La cuenta destino debe ser distinta a la de origen', 400);
             }
 
             const cuentasBloqueadas = await this.cuentaQueryService.obtenerCuentasBloqueadasPorIds(client, [
@@ -292,5 +386,103 @@ export class TransferenciaOperacionService {
         }
 
         return this.cuentaQueryService.obtenerIdCuentaPorNumeroTx(client, numeroCuentaOrigen);
+    }
+
+    private async aplicarReversaExternaTx(args: {
+        client: import('pg').PoolClient;
+        idCuentaOrigen: number;
+        montoNumero: number;
+        idTransaccionExterna: number;
+        saldoActual: number;
+    }): Promise<number> {
+        const saldoReversado = args.saldoActual + args.montoNumero;
+
+        await args.client.query(
+            `
+            UPDATE BancoFuego.Cuenta
+            SET saldo = $1
+            WHERE id_cuenta = $2
+            `,
+            [saldoReversado, args.idCuentaOrigen],
+        );
+
+        await args.client.query(
+            `
+            INSERT INTO BancoFuego.Movimiento
+                (naturaleza, monto, saldo_anterior, saldo_nuevo, id_cuenta, id_transaccion)
+            VALUES ('CREDITO', $1, $2, $3, $4, $5)
+            `,
+            [args.montoNumero, args.saldoActual, saldoReversado, args.idCuentaOrigen, args.idTransaccionExterna],
+        );
+
+        return saldoReversado;
+    }
+
+    private publicarEventoTransferenciaExterna(payload: {
+        referenciaExterna: string;
+        estado: 'PENDIENTE' | 'ACEPTADA' | 'RECHAZADA';
+        numeroTarjeta: string | undefined;
+        numeroCuentaOrigen: string;
+        numeroCuentaDestino: string;
+        monto: number;
+        reversaAplicada: boolean;
+    }): void {
+        this.eventBus.publicar({
+            nombre: TiposEvento.TRANSFERENCIA_REALIZADA,
+            datos: {
+                canal: 'INTERBANCARIA',
+                referenciaExterna: payload.referenciaExterna,
+                estado: payload.estado,
+                numeroTarjeta: payload.numeroTarjeta,
+                numeroCuentaOrigen: payload.numeroCuentaOrigen,
+                numeroCuentaDestino: payload.numeroCuentaDestino,
+                monto: payload.monto,
+                reversaAplicada: payload.reversaAplicada,
+                timestamp: new Date().toISOString(),
+            },
+        });
+    }
+
+    private mapearResultadoExterno(
+        resultado: ResultadoTransferenciaInterbancaria,
+        referenciaFallback: string,
+    ): {
+        estadoTransaccion: 'PENDIENTE' | 'EXITOSA' | 'FALLIDA';
+        estadoPublico: 'PENDIENTE' | 'ACEPTADA' | 'RECHAZADA';
+        referenciaExterna: string;
+        estadoDetalle: string;
+        mensaje: string;
+        statusCode: number;
+    } {
+        if (resultado.estado === 'ACEPTADA') {
+            return {
+                estadoTransaccion: 'EXITOSA',
+                estadoPublico: 'ACEPTADA',
+                referenciaExterna: resultado.referencia,
+                estadoDetalle: 'Transferencia aceptada por la red bancaria',
+                mensaje: 'Transferencia externa aceptada',
+                statusCode: 200,
+            };
+        }
+
+        if (resultado.estado === 'RECHAZADA') {
+            return {
+                estadoTransaccion: 'FALLIDA',
+                estadoPublico: 'RECHAZADA',
+                referenciaExterna: referenciaFallback,
+                estadoDetalle: `Transferencia rechazada por la red bancaria (${resultado.codigoError})`,
+                mensaje: 'Transferencia externa rechazada',
+                statusCode: 409,
+            };
+        }
+
+        return {
+            estadoTransaccion: 'PENDIENTE',
+            estadoPublico: 'PENDIENTE',
+            referenciaExterna: resultado.referenciaExterna,
+            estadoDetalle: 'Transferencia pendiente en red bancaria externa',
+            mensaje: 'Transferencia externa registrada',
+            statusCode: 202,
+        };
     }
 }
