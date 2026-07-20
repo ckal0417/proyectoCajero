@@ -10,7 +10,7 @@ import logger from './shared/Logger';
 import { MainMenu } from './Presentation/Console/Menus/MainMenu';
 import { transferenciaExternaPollingWorker } from './bootstrap/services';
 
-const APP_MODE = process.env.APP_MODE ?? 'http';
+const APP_MODE = process.env.APP_MODE ?? 'console';
 
 const app: Express = express();
 const port = Number(process.env.PORT ?? 3000);

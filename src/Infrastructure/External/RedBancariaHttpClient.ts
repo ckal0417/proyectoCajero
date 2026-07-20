@@ -37,8 +37,7 @@ export class RedBancariaHttpClient implements IRedBancariaClient {
         );
     }
 
-    async realizarTransferenciaInterbancaria(
-        solicitud: SolicitudTransferenciaInterbancaria,
+    async realizarTransferenciaInterbancaria(solicitud: SolicitudTransferenciaInterbancaria,
     ): Promise<ResultadoTransferenciaInterbancaria> {
         if (!this.baseUrl) {
             const referenciaExterna = `SIM-${Date.now()}`;
@@ -80,6 +79,7 @@ export class RedBancariaHttpClient implements IRedBancariaClient {
             }
 
             return await this.parseJson(response);
+
         } catch (error) {
             logger.warn(`Error de integracion al enviar transferencia externa: ${String(error)}`);
             return { estado: 'PENDIENTE', referenciaExterna: `PEND-${Date.now()}` };
